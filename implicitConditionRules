@@ -1,0 +1,25 @@
+a <= b & b <= c @->@ a <= c @TYPES@ a : INTEGER//REALでは証明できず
+a : b & b : POW (c) @->@ a : c
+not (a : b) & c : POW (b) @->@ not (a : c)
+not (a : POW (b)) & c : POW (b) @->@ not (a : POW (c))
+a : b & not (c : b) @->@ not (a <= c) or not (c <= a) @TYPES@ a : INTEGER
+a : b & not (c : b) @->@ not (a : POW (c)) or not (c : POW (a)) @TYPES@ a : POW (a)
+a : b & not (c : b) @->@ not (a = c)
+a : b +-> c @->@ a : POW (b * c)
+a : POW (b) & b : POW (c) @->@ a : POW (c)
+a : POW (b) & b : FIN (b) @->@ a : FIN (a) //有限集合の部分集合は有限集合
+a : POW (b) @->@ a : POW (a)
+a : FIN (a) & a : POW (b) @->@ a : FIN (b)
+a : POW (b) or a : POW (c) & b : POW (d) & c : POW (d) @->@ a : POW (d)
+(a : POW (b) or a : POW (c) or p) & b : POW (d) & c : POW (d) @->@ a : POW (d) or p
+1 <= a & a * b <= a * c @->@ b <= c
+1 + a <= 0 & a * b <= a * c @->@ c <= b
+0 <= a & a + b <= c @->@ b <= c
+a <= 0 & b <= c + a @->@ b <= c
+a : b +-> c & c : POW (d) @->@ a : b +-> d
+a : b +-> c & b : POW (d) @->@ a : d +-> c
+a : b .. c +-> d @->@ a : INTEGER +-> d
+a : b +-> c .. d @->@ a : b +-> INTEGER
+a : POW (b * c) @->@ dom (a) : POW (b) & dom (a ~) : POW (c)
+a = b       @->@ (a = TRUE or b = FALSE) & (a = FALSE or b = TRUE) @TYPES@ a : BOOL
+not (a = b) @->@ (a = TRUE or b = TRUE) & (a = FALSE or b = FALSE) @TYPES@ a : BOOL

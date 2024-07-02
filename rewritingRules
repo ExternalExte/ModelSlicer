@@ -1,0 +1,430 @@
+%a.(bfalse | b) @->@ {}
+%(a, b).(bfalse | c) @->@ {}
+%(a, b, c).(bfalse | d) @->@ {}
+PI a.(bfalse| b) @->@ 1
+PI a.(b | 1) @->@ 1
+SIGMA a.(b | 0) @->@ 0
+SIGMA a.(bfalse | b) @->@ 0
+(p or q_ or r) & (p or r or s) & (p or not (q_) or s) & t @->@ (p or q_ or r) & (p or not (q_) or s) & t
+(p_ or q) & (q or r) & (not (p_) or r) & s @->@ (p_ or q) & (not (p_) or r) & s
+(p or q_ or r) & (p or r or s) & (p or not (q_) or s) @->@ (p or q_ or r) & (p or not (q_) or s)
+(p or q_ or r) & (p or not (q_)) & s @->@ (p or r) & (p or not (q_)) & s
+(not (p_) or q) & p_ & r @->@ p_ & q & r
+(p_ or q) & (q or r) & (not (p_) or r) @->@ (p_ or q) & (not (p_) or r)
+(p_ or q) & not (p_) & r @->@ not (p_) & q & r
+(p or not (q_)) & (p or q_) & r @->@ p & r
+(p or q_) & (p or not (q_) or r) & s @->@ (p or q_) & (p or r) & s
+p_ & not (p_) & q @->@ bfalse
+p_ & p_ & q @->@ p_ & q
+p & (p or q) & r @->@ p & r
+(p or q_ or r) & (p or not (q_)) @->@ (p or r) & (p or not (q_))
+(not (p_) or q) & p_ @->@ p_ & q
+(p_ or q) & not (p_) @->@ not (p_) & q
+(p or not (q_)) & (p or q_) @->@ p
+(p or q_) & (p or not (q_) or r) @->@ (p or q_) & (p or r)
+p_ & not (p_) @->@ bfalse
+p_ & p_ @->@ p_
+p & (p or q) @->@ p
+p & bfalse @->@ bfalse
+p & btrue @->@ p
+a * 1 @->@ a
+a * 0 @->@ 0
+a + (-a) + b @->@ b
+a + (- (b_ + c)) @->@ a + (-b) + (-c)
+a + (-a) @->@ 0
+a + 0 @->@ a
+x_lit : t_types @->@ btrue
+(id (dom (r /\ (id (t_type - u) ; r))) ; r) \/ s /\ ((id (t_type - u) ; r) \/ s) /\ ((id (t_type - dom (s /\ (id (t_type - u) ; s))) ; r) \/ s) /\ ((id (t_type - u) ; r) \/ s) /\ ((id (dom (r /\ (id (t_type - u) ; r))) ; r) \/ (id (t_type - u) ; s)) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) /\ (((id (t_type - dom (s /\ (id (t_type - u) ; s))) ; r)) \/ (id (t_type - u) ; s)) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) /\ x @->@ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s) /\ ((id (t_type - dom (s)) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s)) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) /\ ((id (t_type - dom (s)) ; r) \/ (id (t_type - u) ; s)) /\ x //追加
+(id (dom (r /\ (id (t_type - u) ; r))) ; r) \/ s /\ ((id (t_type - u) ; r) \/ s) /\ ((id (t_type - dom (s /\ (id (t_type - u) ; s))) ; r) \/ s) /\ ((id (t_type - u) ; r) \/ s) /\ ((id (dom (r /\ (id (t_type - u) ; r))) ; r) \/ (id (t_type - u) ; s)) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) /\ (((id (t_type - dom (s /\ (id (t_type - u) ; s))) ; r)) \/ (id (t_type - u) ; s)) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) @->@ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s) /\ ((id (t_type - dom (s)) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s)) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) /\ ((id (t_type - dom (s)) ; r) \/ (id (t_type - u) ; s))
+a \/ b /\ (c \/ b) /\ (a \/ c) /\ c /\ d @->@ a \/ b /\ c /\ d
+(id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s) \/ t /\ ((id (t_type - dom (s)) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s) \/ t) /\ ((id (t_type - dom (t)) ; r) \/ (id (t_type - dom (t)) ; s) \/ t) /\ ((id (t_type - dom (s)) ; r) \/ (id (t_type - dom (t)) ; s) \/ t) /\ x @->@ r \/ s \/ t /\ ((id (t_type - dom (s \/ t /\ ((id (t_type - dom (t)) ; s) \/ t))) ; r) \/ s \/ t) /\ (r \/ (id (t_type - dom (t)) ; s) \/ t) /\ ((id (t_type - dom (s \/ t /\ ((id (t_type - dom (t)) ; s) \/ t))) ; r) \/ (id (t_type - dom (t)) ; s) \/ t) /\ x // 追加
+(id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s) \/ t /\ ((id (t_type - dom (s)) ; r) \/ (id (dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s))) ; s) \/ t) /\ ((id (t_type - dom (t)) ; r) \/ (id (t_type - dom (t)) ; s) \/ t) /\ ((id (t_type - dom (s)) ; r) \/ (id (t_type - dom (t)) ; s) \/ t) @->@ r \/ s \/ t /\ ((id (t_type - dom (s \/ t /\ ((id (t_type - dom (t)) ; s) \/ t))) ; r) \/ s \/ t) /\ (r \/ (id (t_type - dom (t)) ; s) \/ t) /\ ((id (t_type - dom (s \/ t /\ ((id (t_type - dom (t)) ; s) \/ t))) ; r) \/ (id (t_type - dom (t)) ; s) \/ t)
+(a \/ b_ \/ c) /\ (a \/ c \/ d) /\ (a \/ (t_type - b_) \/ d) /\ e @->@ (a \/ b_ \/ c) /\ (a \/ (t_type - b_) \/ d) /\ e
+(a \/ b_ \/ c) /\ (a \/ c \/ d) /\ (a \/ (t_type - b_) \/ d) @->@ (a \/ b_ \/ c) /\ (a \/ (t_type - b_) \/ d) //追加
+(a_ \/ b) /\ (b \/ c) /\ ((t_type - a_) \/ c) /\ d @->@ (a_ \/ b) /\ ((t_type - a_) \/ c) /\ d
+(a_ \/ b) /\ (b \/ c) /\ ((t_type - a_) \/ c) @->@ (a_ \/ b) /\ ((t_type - a_) \/ c) //追加
+r \/ s /\ ((id (t_type - u) ; r) \/ s) /\ (r \/ ((id (t_type - u) ; s))) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) /\ x @->@ (id (dom (r)) \/ id (dom (s)) /\ id (t_type - u) ; r) \/ (id (dom (r)) \/ id (dom (s)) /\ id (t_type - u) ; s) /\ x // 追加
+r \/ s /\ ((id (t_type - u) ; r) \/ s) /\ (r \/ ((id (t_type - u) ; s))) /\ ((id (t_type - u) ; r) \/ (id (t_type - u) ; s)) @->@ (id (dom (r)) \/ id (dom (s)) /\ id (t_type - u) ; r) \/ (id (dom (r)) \/ id (dom (s)) /\ id (t_type - u) ; s)
+a \/ b /\ (c \/ b) /\ (a \/ c) /\ c /\ d @->@ a \/ b /\ c /\ d // 追加
+a \/ b /\ (c \/ b) /\ (a \/ c) /\ c @->@ a \/ b /\ c
+(id (dom (r /\ t_type - s)) ; r) /\ t_type - s /\ (id (t_type - u) ; r) /\ t_type - s /\ x @->@ r /\ (id (t_type - u) ; r) /\ t_type - s /\ x //追加
+(id (dom (r /\ t_type - s)) ; r) /\ t_type - s /\ (id (t_type - u) ; r) /\ t_type - s @->@ r /\ (id (t_type - u) ; r) /\ t_type - s
+(id (dom (r /\ (id (t_type - v) ; r))) ; r) /\ (id (t_type - v) ; r) /\ (id (t_type - u) ; r) /\ (id (t_type - v) ; r) /\ x @->@ r /\ (id (t_type - u /\ t_type - v) ; r) /\ x // 追加
+(id (dom (r /\ (id (t_type - v) ; r))) ; r) /\ (id (t_type - v) ; r) /\ (id (t_type - u) ; r) /\ (id (t_type - v) ; r) @->@ r /\ (id (t_type - u /\ t_type - v) ; r)
+(id (dom (r /\ s)) ; r) /\ (id (dom (r /\ s)) ; s) /\ (id (t_type - u) ; r) /\ (id (t_type - u) ; s) /\ x @->@ r /\ (id (t_type - u) ; r) /\ s /\ (id (t_type - u) ; s) /\ x // 追加
+(id (dom (r /\ s)) ; r) /\ (id (dom (r /\ s)) ; s) /\ (id (t_type - u) ; r) /\ (id (t_type - u) ; s) @->@ r /\ (id (t_type - u) ; r) /\ s /\ (id (t_type - u) ; s)
+r /\ ((id (t_type - u) ; r) \/ r) /\ (r \/ (id (t_type - v) ; r)) /\ ((id (t_type - u) ; r) \/ (id (t_type - v) ; r)) /\ x @->@ r /\ (id (t_type - (u /\ v)) ; r) /\ x // 追加
+r /\ ((id (t_type - u) ; r) \/ r) /\ (r \/ (id (t_type - v) ; r)) /\ ((id (t_type - u) ; r) \/ (id (t_type - v) ; r)) @->@ r /\ (id (t_type - (u /\ v)) ; r)
+(a \/ b_ \/ c) /\ (a \/ c \/ d) /\ (a \/ (t_type - b_) \/ d) /\ e @->@ (a \/ b_ \/ c) /\ (a \/ (t_type - b_) \/ d) /\ e // 追加
+(a \/ b_ \/ c) /\ (a \/ c \/ d) /\ (a \/ (t_type - b_) \/ d) @->@ (a \/ b_ \/ c) /\ (a \/ (t_type - b_) \/ d)
+(a \/ b_ \/ c) /\ (a \/ (t_type - b_)) /\ d @->@ (a \/ c) /\ (a \/ (t_type - b_)) /\ d
+((t_type - a_) \/ b) /\ a_ /\ c @->@ a_ /\ b /\ c
+(a_ \/ b) /\ (b \/ c) /\ ((t_type - a_) \/ c) @->@ (a_ \/ b) /\ ((t_type - a_) \/ c)
+(a_ \/ b) /\ (t_type - a_) /\ c @->@ (t_type - a_) /\ b /\ c
+(a \/ (t_type - b_)) /\ (a \/ b_) /\ c @->@ a /\ c
+(a \/ b_) /\ (a \/ (t_type - b_) \/ c) /\ d @->@ (a \/ b_) /\ (a \/ c) /\ d
+(id (dom (r)) ; r >< s) /\ (id (dom (s)) ; r >< s) /\ (id (t_type - u) ; r >< s) /\ x @->@ r /\ (id (t_type - u) ; r) >< (s /\ (id (t_type - u) ; s)) /\ x //追加
+(id (dom (r)) ; r >< s) /\ (id (dom (s)) ; r >< s) /\ (id (t_type - u) ; r >< s) @->@ r /\ (id (t_type - u) ; r) >< (s /\ (id (t_type - u) ; s))
+a_ /\ (t_type - a_) /\ b @->@ {}
+a_ /\ a_ /\ b @->@ a_ /\ b
+a /\ b : POW (a) @->@ btrue //追加
+a /\ (a \/ b) /\ c @->@ a /\ c
+(a \/ b_ \/ c) /\ (a \/ (t_type - b_)) @->@ (a \/ c) /\ (a \/ (t_type - b_))
+u * {b} \/ {a |-> b} /\ ((t_type - {a}) * {b} \/ {a |-> b}) /\ x @->@ u * {b} \/ {a |-> b} /\ x // 追加
+u * {b} \/ {a |-> b} /\ ((t_type - {a}) * {b} \/ {a |-> b}) @->@ u * {b} \/ {a |-> b}
+(t_type - a_) \/ b /\ a_ @->@ a_ /\ b
+(a_ \/ b) /\ (t_type - a_) @->@ (t_type - a_) /\ b
+f \/ {x |-> f(x)} /\ ((id (t_type - {x}) ; f) \/ {x |-> f(x)}) /\ y @->@ f /\ y //追加
+f \/ {x |-> f(x)} /\ ((id (t_type - {x}) ; f) \/ {x |-> f(x)}) @->@ f
+(a \/ (t_type - b_)) /\ (a \/ b_) /\ c @->@ a /\ c // 追加
+(a \/ (t_type - b_)) /\ (a \/ b_) @->@ a
+r \/ (id (v) ; r) /\ ((id (t_type - u) ; r) \/ (id (v) ; r)) /\ x @->@ r /\ (id (t_type - u \/ v) ; r) /\ x // 追加
+r \/ (id (v) ; r) /\ ((id (t_type - u) ; r) \/ (id (v) ; r)) @->@ r /\ (id (t_type - u \/ v) ; r)
+(a \/ b_) /\ (a \/ (t_type - b_) \/ c) @->@ (a \/ b_) /\ (a \/ c)
+{a |-> a} /\ id (t_type - {a}) /\ b @->@ {} // 追加
+{a |-> a} /\ id (t_type - {a}) @->@ {}
+a + n_lit .. b /\ {a} /\ c @->@ {} // 追加
+a + n_lit .. b /\ {a} @->@ {}
+a + n_lit .. b /\ (INTEGER - {a}) /\ c @->@ a + n_lit .. b /\ c // 追加
+a + n_lit .. b /\ (INTEGER - {a}) @->@ a + n_lit .. b
+a .. b + (- n_lit) /\ {b} /\ c @->@ {} // 追加
+a .. b + (- n_lit) /\ {b} @->@ {}
+a .. b + (- n_lit) /\ (INTEGER - {b}) /\ c @->@ a .. b + (-n_lit) /\ c // 追加
+a .. b + (- n_lit) /\ (INTEGER - {b}) @->@ a .. b + (-n_lit)
+a .. b /\ {a + (-n_lit)} /\ c @->@ {} // 追加
+a .. b /\ {a + (-n_lit)} @->@ {}
+a .. b /\ {b + n_lit} /\ c @->@ {} // 追加
+a .. b /\ {b + n_lit} @->@ {}
+a .. b /\ (INTEGER - {a + (- n_lit)}) /\ c @->@ a .. b /\ c // 追加
+a .. b /\ (INTEGER - {a + (- n_lit)}) @->@ a .. b
+a .. b /\ (INTEGER - {b + n_lit}) /\ c @->@ a .. b /\ c // 追加
+a .. b /\ (INTEGER - {b + n_lit}) @->@ a .. b
+a .. b /\ (INTEGER - {a}) /\ c @->@ a + 1 .. b /\ c //追加
+a .. b /\ (INTEGER - {a}) @->@ a + 1 .. b
+a .. b /\ (INTEGER - {b}) /\ c @->@ a .. b + (-1) /\ c //追加
+a .. b /\ (INTEGER - {b}) @->@ a .. b + (-1)
+a .. b /\ c - {b} /\ d @->@ a .. b + (-1) /\ d // 追加
+a .. b /\ c - {b} @->@ a .. b + (-1)
+a .. b /\ c - {a} /\ d @->@ a + 1 .. b /\ d // 追加 
+a .. b /\ c - {a} @->@ a + 1 .. b
+a .. b /\ c .. b /\ d @->@ max ({a} \/ {c}) .. b /\ d // 追加
+a .. b /\ c .. b @->@ max ({a} \/ {c}) .. b
+a .. b /\ a .. c /\ d @->@ a .. min ({b} \/ {c}) /\ d // 追加
+a .. b /\ a .. c @->@ a .. min ({b} \/ {c})
+a .. b /\ INTEGER /\ c @->@ a .. b /\ c // 追加
+a .. b /\ INTEGER @->@ a .. b
+(id (u) ; r) /\ t_type - (id (v) ; r) /\ x @->@ (id (u) ; r) /\ (id (t_type - v) ; r) /\ x // 追加
+(id (u) ; r) /\ t_type - (id (v) ; r) @->@ (id (u) ; r) /\ (id (t_type - v) ; r)
+id (u) /\ t1_type - id (v) /\ x @->@ id (u) /\ id (t2_type - v) /\ x // 追加
+id (u) /\ t1_type - id (v) @->@ id (u) /\ id (t2_type - v)
+id (a) /\ id (t_type - a) /\ b @->@ {} // 追加
+id (a) /\ id (t_type - a) @->@ {}
+a_ /\ (t_type - a_) @->@ {}
+a_ /\ a_ @->@ a_
+a /\ (a \/ b) @->@ a
+r /\ id (t_type - u /\ t_type - v ; r) /\ x @->@ r /\ (id (t_type - u) ; r) /\ (id (t_type - v) ; r) /\ x // 追加
+r /\ id (t_type - u /\ t_type - v ; r) @->@ r /\ (id (t_type - u) ; r) /\ (id (t_type - v) ; r)
+a /\ {} @->@ {}
+a /\ t_type @->@ a
+(a /\ b) \/ b \/ c @->@ b \/ c
+a_ \/ (t_type - a_) \/ b @->@ t_type
+a_ \/ a_ \/ b @->@ a_ \/ b
+a_ \/ a_ \/ b @->@ a_ \/ b
+(a_ /\ b) \/ c @->@ (a_ \/ c) /\ (b \/ c)
+(a /\ b) \/ b @->@ b
+{{}} \/ {{a}} \/ b @->@ POW({a}) \/ b // 追加
+{{}} \/ {{a}} @->@ POW({a})
+(r /\ (id (t_type - dom (s)) ; r) ; id (a)) \/ (s ; id (a)) \/ x @->@ (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s) ; id (a)) \/ x // 追加
+(r /\ (id (t_type - dom (s)) ; r) ; id (a)) \/ (s ; id (a)) @->@ r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s) ; id (a)
+((id (u) /\ id (dom (r)) /\ id (t_type - (u /\ dom (s))) ; id (u)) ; r) \/ (id (u) ; s) \/ x @->@ ((id (u) ; r) \/ (id (u) ; s) /\ ((id (t_type - dom (s)) ; r) \/ (id (u) ; s))) \/ x // 追加
+((id (u) /\ id (dom (r)) /\ id (t_type - (u /\ dom (s))) ; id (u)) ; r) \/ (id (u) ; s) @->@ (id (u) ; r) \/ (id (u) ; s) /\ ((id (t_type - dom (s)) ; r) \/ (id (u) ; s))
+(r~ ; id (dom (r)) /\ id (t_type - dom (s))) \/ s~ \/ x @->@ (r~ \/ s~ /\ ((r~ ; id (t_type - dom (s))) \/ s~)) \/ x // 追加
+(r~ ; id (dom (r)) /\ id (t_type - dom (s))) \/ s~ @->@ r~ \/ s~ /\ ((r~ ; id (t_type - dom (s))) \/ s~)
+(r ; id (dom (r~)) \/ id (dom (s~)) /\ id (t_type - u)) \/ (s ; id (dom (r~)) \/ id (dom (s~)) /\ id (t_type - u)) \/ x @->@ (r ; id (dom (r~)) /\ id (t_type - u)) \/ (s ; id (dom (s~)) /\ id (t_type - u)) \/ x // 追加
+(r ; id (dom (r~)) \/ id (dom (s~)) /\ id (t_type - u)) \/ (s ; id (dom (r~)) \/ id (dom (s~)) /\ id (t_type - u)) @->@ (r ; id (dom (r~)) /\ id (t_type - u)) \/ (s ; id (dom (s~)) /\ id (t_type - u))
+dom (id (dom (a)) /\ id (t_type - dom (b)) ; a) \/ dom (b) \/ c @->@ dom (a) \/ dom (b) \/ c // 追加
+dom (id (dom (a)) /\ id (t_type - dom (b)) ; a) \/ dom (b) @->@ dom (a) \/ dom (b)
+{} \/ a @->@ a
+a_ \/ (t_type - a_) @->@ t_type
+a_ \/ a_ @->@ a_
+a_ \/ a_ @->@ a_
+a \/ {} @->@ a
+a \/ t_type @->@ t_type
+p_ or not (p_) or q @->@ btrue
+p_ or p_ or q @->@ p_ or q
+(p_ & q) or r @->@ (p_ or r) & (q or r)
+p_ or not (p_) @->@ btrue
+p_ or p_ @->@ p_
+p or btrue @->@ btrue
+p or bfalse @->@ p
+{{}} @->@ POW({})
+a [b] @->@ ran (b <| a)
+(d \/ {a |-> c} /\ ((id (t_type - {a}) ; d) \/ {a |-> c})) (a) @->@ c
+(r \/ {a |-> b} /\ (((id (t_type - {a}) ; r)) \/ {a |-> b})) (a) @->@ b
+(a \/ {b |-> c}) (b) @->@ c
+{a |-> b} (a) @->@ b
+(a * {b}) (c) @->@ b
+prj1(u, v) (a |-> b) @->@ a
+prj1(a, b) (c |-> d) @->@ c
+prj2(u, v) (a |-> b) @->@ b
+prj2(a, b) (c |-> d) @->@ d
+id (a) (b) @->@ b
+a~ (a (b)) @->@ b
+a (a~ (b)) @->@ b
+(a_ /\ b) * c @->@ a_ * c /\ b * c
+(a_ \/ b) * c @->@ a_ * c \/ b * c
+{a} * {b} @->@ {a |-> b}
+{} * a @->@ {}
+a * (b_ + c) @->@ a * b_ + a * c @TYPES@ a : INTEGER
+a * (b /\ c) @->@ a * b /\ a * c
+a * (b \/ c) @->@ a * b \/ a * c
+a * {} @->@ {}
+{} +-> a @->@ POW({})
+a +-> {} @->@ POW({})
+a, b @->@ a |-> b
+t_type - (a_ /\ b) @->@ (t_type - a_) \/ (t_type - b)
+t_type - (a_ \/ b) @->@ (t_type - a_) /\ (t_type - b)
+t_type - (t_type - a) @->@ a
+t_type - {} @->@ t_type
+t_type - t_type @->@ {}
+a - {} @->@ a
+a - b @->@ a /\ (t_type - b) @TYPES@ a : POW (a)
+a - b @->@ a + (-b) @TYPES@ a : INTEGER
+a -->> b @->@ (a --> b) /\ (a +->> b)
+a + n_lit .. a @->@ {}
+a .. a + (- n_lit) @->@ {}
+a .. a @->@ {a}
+a /: b @->@ not (a : b)
+a /<: b @->@ not (a <: b)
+a /<<: b @->@ not (a <<: b)
+a /= b @->@ not (a = b)
+a /\ (b \/ {c}) : POW ({}) @->@ not (c : a) & a /\ b : POW ({})
+a /\ {b} : POW ({}) @->@ not (b : a)
+a_ \/ b : POW (c) @->@ a_ : POW(c) & b : POW(c)
+{a} : POW (b) @->@ a : b
+a - b : POW ({}) @->@ a : POW (b)
+0..MAXINT : POW ({}) @->@ bfalse
+1..MAXINT : POW ({}) @->@ bfalse
+MININT .. MAXINT : POW ({}) @->@ bfalse
+a |-> b : c * d @->@ a : c & b : d
+NATURAL : POW ({}) @->@ bfalse
+NATURAL1 : POW ({}) @->@ bfalse
+BOOL : POW ({}) @->@ bfalse
+INTEGER : POW ({}) @->@ bfalse
+TRUE : BOOL @->@ btrue
+FALSE : BOOL @->@ btrue
+a : b_ /\ c @->@ a : b_ & a : c
+a : b_ \/ c @->@ a : b_ or a : c
+a : b +->> c @->@ a : b +-> c & dom (a~) : POW(c) & c : POW(dom (a~))
+a : t_type - b @->@ a : t_type & not (a : b)
+a : b --> c @->@ a : b +-> c & dom (a) : POW(b) & b : POW(dom (a))
+a : b .. c @->@ b <= a & a <= c & a : INTEGER & b : INTEGER & c : INTEGER
+a : b >+> c @->@ a : b +-> c & a~ : c +-> b
+a : POW (a /\ b) @->@ a : POW(b)
+a : POW ({b}) @->@ (a : POW ({}) or a : POW ({b})) & (a : POW ({}) or {b} : POW (a))
+a : POW (a) @->@ btrue
+a : NATURAL @->@ a : INTEGER & 0 <= a
+a : NATURAL1 @->@ a : INTEGER & 1 <= a
+a : {} @->@ bfalse
+f \/ {x |-> d} /\ ((id (t_type - {x}) ; f) \/ {x |-> d}) ; g @->@ ((id (dom (f ; g)) ; f) /\ (id (t_type - {x}) ; f) ; g) \/ {x |-> g(d)} 
+(id (dom ((r ; id (dom (r~)) /\ id (t_type - v)))) ; r) /\ (id (t_type - u) ; r) ; id (dom (r~)) /\ id (t_type - v) @->@ r /\ (id (t_type - u) ; r) ; id (dom (r~ /\ (r~ ; id (t_type - u)))) /\ id (t_type - v)
+(id (dom (a ; id (b))) ; a) /\ (id (t_type - c) ; a) ; id (b) @->@ a /\ ((id (t_type - c) ; a)) ; id (b)
+(id (dom (r ; s)) ; r) /\ (id (t_type - u) ; r) ; s @->@ r /\ (id (t_type - u) ; r) ; s
+(id (dom (r ; s)) ; r) /\ (id (t_type - u) ; r) ; s @->@ r /\ (id (t_type - u) ; r) ; s
+id (a) /\ id (t1_type - b) ; c @->@ (id (a) ; c) /\ t2_type - (id (b) ; c)
+id (a) /\ id (b) ; c @->@ (id (a) ; c) /\ (id (b) ; c)
+r /\ t_type - s ; id (dom (r~ /\ (t_type - s)~)) /\ id (t_type - u) @->@ (r ; id (dom (r~)) /\ id (t_type - u)) /\ t_type - s
+r /\ t_type - s ; id (v) @->@ (r ; id (v)) /\ t_type - s
+r /\ t_type - s ; id (v) @->@ (r ; id (v)) /\ t_type - s
+r /\ (id (t_type - dom (s)) ; r) ; id (dom (r~ /\ (r~ ; id (t_type - dom (s))))) /\ id (t_type - v)) \/ (s ; id (dom (s~)) /\ id (t_type - v) @->@ r \/ s /\ (((id (t_type - dom (s)) ; r)) \/ s) ; id (dom (r~ \/ s~ /\ ((r~ ; id (t_type - dom (s))) \/ s~))) /\ id (t_type - v)
+r /\ s ; id (dom (r~ /\ s~)) /\ id (t_type - u) @->@ (r ; id (dom (r~)) /\ id (t_type - u)) /\ (s ; id (dom (s~)) /\ id (t_type - u))
+a /\ b ; id (c) @->@ (a ; id (c)) /\ (b ; id (c))
+a \/ b ; c @->@ (a ; c) \/ (b ; c)
+{a |-> FALSE} ; {TRUE |-> b} @->@ {}
+{a |-> TRUE} ; {FALSE |-> b} @->@ {}
+{a |-> b} ; {b |-> c} @->@ {a |-> c}
+{a |-> b} ; c @->@ {a} * dom (c~ ; {b |-> b})
+a * b ; c @->@ a * dom (c~ ; id (b))
+id (v) /\ id (dom (r)) /\ id (t_type - u) ; id (v) ; r @->@ (id (v) ; r) /\ (id (t_type - u) ; r)
+id (dom (a ; b)) /\ id (t_type - c) ; a ; b @->@ id (dom (a)) /\ id (t_type - c) ; a ; b
+id (u) ; r ; id (dom (r~ ; id (u))) /\ id (t_type - v) @->@ ((id (u) ; r) ; id (dom (r~)) /\ id (t_type - v))
+r ; id (dom (r~)) /\ id (t_type - u) ; id (dom (r~ /\ ((id (t_type - u) ; r~)))) /\ id (t_type - v) @->@ r ; id (dom (r~)) /\ id (t_type - u /\ t_type - v))
+r ; id (dom (r~)) /\ id (t_type - v) ; id (w) @->@ r ; id (w) /\ id (t_type - v)
+((r ; id (dom (r~)) /\ id (t_type - v)) ; id (w)) @->@ (r ; id (w) /\ id (t_type - v))
+r ; id (dom (r~)) /\ id (t_type - u) ; s @->@ r ; s /\ (id (t_type - u) ; s)
+a ; id (dom (a~)) /\ id (t_type - b) ; c @->@ a ; id (dom (c)) /\ id (t_type - b) ; c
+d ; a /\ b ; id (c) @->@ d ; (a ; id (c)) /\ (b ; id (c))
+a ; id (b) ; c * d @->@ a; (b /\ c) * d
+r ; id (u) ; id (dom (id (u) ; r~) /\ id (t_type - v)) @->@ r ; id (u) /\ id (t_type - v)
+a ; id (b); id (c) @->@ a; id (b) /\ id (c)
+r ; s ; id (dom (s~ ; r~)) /\ id (t_type - u) @->@ r ; s ; id (dom (s~)) /\ id (t_type - u)
+r ; s ; id (dom ((s~ ; r~))) /\ id (t_type - u) @->@ r ; s ; id (dom (s~)) /\ id (t_type - u)
+a ; b ; id (dom (b~ ; a~)) /\ id (t_type - c) @->@ a ; b ; id (dom (b~)) /\ id (t_type - c)
+d ; a ; id (b) /\ id (t1_type - c) @->@ d ; (a ; id (b)) /\ t2_type - (a ; id (c))
+d ; a ; id (b) /\ id (c) @->@ d ; (a ; id (b)) /\ (a ; id (c))
+r >< s ; (id (u) || id (v)) @->@ r >< s ; id (u * v)
+(r || s) ; (id (u) || id (v)) @->@ (r || s) ; id (u * v)
+id (dom (b) - a) ; b : POW ({}) @->@ dom (b) : POW (a)
+id (t_type - dom (a)) ; a @->@ {}
+id (dom (a)) ; a @->@ a
+id (t_type) ; a @->@ a
+id (a) ; b /\ t_type - c @->@ (id (a) ; b) /\ t_type - c
+id (a) ; b /\ c @->@ (id (a) ; b) /\ (id (a) ; c)
+id (a) ; b * c @->@ (a /\ b) * c
+id (a) ; b : POW ({}) @->@ a /\ dom (b) : POW ({})
+id (a) ; id (b) @->@ id (a) /\ id (b)
+r~ ; id (dom (r)) /\ id (t_type - u) @->@ r~ /\ (r~ ; id (t_type - u))
+a~ ; id (dom (a)) @->@ a~
+{} ; a @->@ {}
+r ; id (dom (r~)) /\ id (t_type - u /\ t_type - v) @->@ (r ; id (dom (r~)) /\ id (t_type - u)) /\ (r ; id (dom (r~)) /\ id (t_type - v))
+r ; id (dom (r~)) /\ id (t_type - u \/ t_type - v) @->@ (r ; id (dom (r~)) /\ id (t_type - u)) \/ (r ; id (dom (r~)) /\ id (t_type - v))
+r ; id (dom (r~)) /\ id (t_type - u \/ v) @->@ (r ; id (dom (r~)) /\ id (t_type - u)) \/ (r ; id (v))
+r ; id (dom (r~)) /\ id (t_type) @->@ r
+a ; id (b) /\ id (t1_type - c) @->@ (a ; id (b)) /\ t2_type
+a ; id (b) /\ id (c) @->@ (a ; id (b)) /\ (a ; id (c))
+a ; b \/ c @->@ (a ; b) \/ (a ; c)
+a ; {b |-> c} @->@ dom (a ; {b |-> b}) * {c}
+a ; b * c @->@ dom (a ; id (b)) * c
+a ; id (dom (a~) - b) : POW ({}) @->@ dom (a~) : POW (b)
+a ; id (b) : POW ({}) @->@ dom (a~) /\ b : POW ({})
+a ; (b ; c) @->@ a ; b ; c
+a ; id (dom (a~)) @->@ a
+a ; {} @->@ {}
+a < b @->@ a + 1 <= b@TYPES@ a : INTEGER
+a <+ b @->@ (dom (b) <<| a) \/ b
+a <-> b @->@ POW (a * b)
+a <: b @->@ a : POW (b)
+a <<: b @->@ a <: b & not (a = b)
+a <<| b @->@ id (dom (b) /\ (t_type - a)) ; b
+a * (- n_lit) <= 0 @->@ 0 <= a @TYPES@ a : INTEGER
+a * n_lit <= 0 @->@ a <= 0 @TYPES@ a : INTEGER
+a * m_lit + b <= a * n_lit + c @->@ b <= a * (n_lit + (-m_lit)) + c @TYPES@ a : INTEGER
+a * m_lit + b <= a * n_lit @->@ b <= a * (n_lit + (-m_lit)) @TYPES@ a : INTEGER
+(-a) + b <= c @->@ b <= a + c @TYPES@ a : INTEGER
+a_ + b <= a_ + c @->@ b <= c@TYPES@ a : INTEGER
+a * m_lit <= a * n_lit + b @->@ 0 <= a * (n_lit + (-m_lit)) + b
+a * n_lit <= b * n_lit @->@ a <= b
+a * m_lit <= a * n_lit @->@ 0 <= a * (n_lit + (-m_lit))
+-a <= b @->@ 0 <= a + b
+card (a /\ b) <= card (a) @->@ btrue
+max (a /\ b) <= max (a) @->@ btrue
+max (a) <= max (a \/ b) @->@ btrue
+min (a \/ b) <= min (a) @->@ btrue
+min (a) <= min (a /\ b) @->@ btrue
+0 <= a * (- n_lit) @->@ a <= 0
+0 <= a * n_lit @->@ 0 <= a
+0 <= a ** 2 @->@ btrue
+(a ** b) ** c @->@ a ** (b * c)
+0 <= card (a) @->@ btrue
+a <= (-b) + c @->@ a + b <= c
+a <= -b @->@ a + b <= 0
+a <= a @->@ btrue
+a <= a @->@ btrue
+p <=> q @->@ p => q & q => p
+a <| b @->@ id (a) ; b
+a |-> b = c |-> d @->@ a : POW (c) & c : POW (a) & b : POW (d) & d : POW (b)@TYPES@ a : POW (a) & b : POW (b)
+a |-> b = c |-> d @->@ a : POW (c) & c : POW (a) & b <= d & d <= b@TYPES@ a : POW (a) & b : INTEGER
+a |-> b = c |-> d @->@ a : POW (c) & c : POW (a) & b = d@TYPES@ a : POW (a)
+a |-> b = c |-> d @->@ a <= c & c <= a & b : POW (d) & d : POW (b)@TYPES@ a : INTEGER & b : POW (b)
+a |-> b = c |-> d @->@ a <= c & c <= a & b <= d & d <= b@TYPES@ a : INTEGER & b : INTEGER
+a |-> b = c |-> d @->@ a <= c & c <= a & b = d@TYPES@ a : INTEGER
+a |-> b = c |-> d @->@ a = c & b : POW (d) & d : POW (b)@TYPES@ b : POW (b)
+a |-> b = c |-> d @->@ a = c & b <= d & d <= b@TYPES@ b : INTEGER
+a |-> b = c |-> d @->@ a = c & b = d
+bool(p) = FALSE @->@ not (p)
+bool(p) = TRUE @->@ p
+card (a) = 0 @->@ a : POW ({})
+FALSE = TRUE @->@ bfalse
+a = b @->@ a <= b & b <= a@TYPES@ a : INTEGER
+a = b @->@ a <: b & b <: a@TYPES@ a : POW (b)
+a = a @->@ btrue
+p => q @->@ not (p) or q
+a > b @->@ b + 1 <= a@TYPES@ a : INTEGER
+a >-> b @->@ (a --> b) /\ (a >+> b)
+a >->> b @->@ (a --> b) /\ (a >+> b) /\ (a +->> b)
+(id (a) ; b) >< (id (a) ; c) @->@ id (a) ; b >< c
+(a ; b) >< (c ; d) @->@ a >< c ; (b || d)
+{} >< a @->@ {}
+a >< {} @->@ {}
+a >= b @->@ b <= a
+a mod b @->@ a + (- b * (a / b))
+a |> b @->@ a ; id (b)
+a |>> b @->@ a ; id (dom (a~) /\ (t_type - b))
+(id (a) ; b) || (id (c) ; d) @->@ id (a * c) ; (b || d)
+(a ; b) || (c ; d) @->@ (a || c) ; (b || d)
+-(-a) @->@ a
+-0 @->@ 0
+FIN1(a) @->@ FIN(a) /\ (t_type - {{}})
+POW1(a) @->@ POW(a) /\ (t_type - {{}})
+bool (bfalse) @->@ FALSE
+bool (btrue) @->@ TRUE
+card (a \/ b) @->@ card (a) + card (b) + (- 1) * card (a /\ b)
+card ({a}) @->@ 1
+card (POW({})) @->@ 1
+card (id (a)) @->@ card (a)
+card (a ~) @->@ card (a)
+card ({}) @->@ 0
+dom (((r~ ; id (u))) \/ ((s~ ; id (u))) /\ (((r~ ; id (u) /\ id (t_type - dom (s)))) \/ ((s~ ; id (u))))) @->@ dom (((r~ ; id (u))) /\ ((r~ ; id (u) /\ id (t_type - dom (s))))) \/ dom ((s~ ; id (u)))
+dom (r~ \/ s~ /\ ((r~ ; id (t_type - dom (s))) \/ s~)) @->@ dom (r~ /\ (r~ ; id (t_type - dom (s)))) \/ dom (s~)
+dom (r \/ s /\ ((id (t_type - dom (s)) ; r) \/ s)) @->@ dom (r) \/ dom (s)
+dom (((r ; id (v))) /\ (((id (t_type - u) ; r) ; id (v)))) @->@ dom ((r ; id (v))) /\ t_type - u
+dom (id (a) /\ id (b)) @->@ a /\ b
+dom (r~ /\ (id (t_type - u) ; r~)) @->@ dom (r~) /\ t_type - u
+dom (r~ /\ ((id (t_type - u) ; r~))) @->@ dom (r~) /\ t_type - u
+dom (r /\ (id (t_type - u) ; r)) @->@ dom (r) /\ t_type - u
+dom (a \/ b) @->@ dom (a) \/ dom (b)
+dom ({a |-> b}) @->@ {a}
+dom (a * b) @->@ a
+dom (id (dom (a)) /\ (t_type - b) ; a) @->@ dom (a) /\ (t_type - b)
+dom ((r~ /\ ((id (t_type - u) ; r~)) ; id (v))) @->@ dom ((r~ ; id (v))) /\ t_type - u
+dom (id (u) ; r~ ; id (v)) @->@ dom (r~ ; id (v)) /\ u
+dom ((r~ || s~) ; id (u * v)) @->@ dom (r~ ; id (u)) * dom (s~ ; id (v))
+dom (id (u) ; r~) @->@ dom (r~) /\ u
+dom (id (a) ; b) @->@ a /\ dom (b)
+dom ((r >< s)~ ; id (u)) @->@ (r~ ; id (u) ; s)
+dom (a~ ; a) @->@ dom (a~)
+dom ((r ; id (u) /\ id (dom (r~)) /\ id (t_type - u))) @->@ {}
+dom (a ; id (dom (b))) @->@ dom (a ; b)
+dom (a ; a~) @->@ dom (a)
+dom (a >< b) @->@ dom (a) /\ dom (b)
+dom (prj1 (a, b)) @->@ a * b
+dom (prj2 (a, b)) @->@ a * b
+dom (a || b) @->@ dom (a) * dom (b)
+dom (id (a)) @->@ a
+dom ((id (a) ; b~)~) @->@ dom (b ; id (a))
+dom ((f >< g)~) @->@ f~ ; g
+dom ((f >< g)~) @->@ f~ ; g
+dom ({}) @->@ {}
+id (a_ /\ b) @->@ id (a_) /\ id (b)
+id (a_ \/ b) @->@ id (a_) \/ id (b)
+id ({a}) @->@ {a |-> a}
+id ({}) @->@ {}
+max ({max (a)} \/ b) @->@ max (a \/ b)
+max ({a}) @->@ a
+max (a .. b) @->@ b
+min ({min (a)} \/ b) @->@ min (a \/ b)
+min ({a}) @->@ a
+min (a .. b) @->@ a
+min (NATURAL) @->@ 0
+min (NATURAL1) @->@ 1
+not (p_ & q) @->@ not (p_ ) or not (q)
+not (p_ or q) @->@ not (p_) & not (q)
+not (not (p)) @->@ p
+not (btrue) @->@ bfalse
+not (bfalse) @->@ btrue
+pred (a) @->@ a + (-1)
+ran (r) @->@ dom (r~)
+succ (a) @->@ a + 1
+(a_ /\ b) ~ @->@ a_ ~ /\ b ~
+(a_ \/ b) ~ @->@ a_ ~ \/ b ~
+{a |-> b} ~ @->@ {b |-> a}
+(a * b) ~ @->@ b * a
+(a ; b) ~ @->@ b~ ; a~
+(a || b) ~ @->@ a~ || b~
+id (a) ~ @->@ id (a)
+a ~~ @->@ a
+{} ~ @->@ {}
+INT @->@ MININT .. MAXINT
+NAT @->@ 0 .. MAXINT
+NAT1 @->@ 1 .. MAXINT
+//427個
