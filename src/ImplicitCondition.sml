@@ -1,4 +1,4 @@
-structure ImplicitCondition = 
+structure ImplicitCondition =
 struct
   exception ICondError of string
 
@@ -6,13 +6,13 @@ struct
       let
         fun extractIntegerLiterals (BE_Leaf (_, IntegerLiteral x)) = [x]
           | extractIntegerLiterals e = List.concat (List.map extractIntegerLiterals (AST.subExprTrees e))
-          
+
         fun extractRealLiterals (BE_Leaf (_, RealLiteral x)) = [x]
           | extractRealLiterals e = List.concat (List.map extractRealLiterals (AST.subExprTrees e))
 
         fun extractAndMakeSetSubstractionConditions (substraction as BE_Node2 (SOME (BT_Power to), Keyword "-", lhs, _)) = [(BE_Node2 (SOME BT_Predicate, Keyword ":", substraction, BE_Node1 (SOME (BT_Power (SOME (BT_Power to))), Keyword "POW", lhs)))]
           | extractAndMakeSetSubstractionConditions e = List.concat (List.map extractAndMakeSetSubstractionConditions (AST.subExprTrees e))
-          
+
         val integerList = Utils.deleteDouble Utils.eqto ((0 : IntInf.int) :: (1 : IntInf.int) :: extractIntegerLiterals e) (* 0, 1 は加法・乗法で単位元や零元となる特別な値なので加えておく *)
         val realList    = Utils.deleteDouble Utils.eqto ((BReal.fromString "0.0") :: (BReal.fromString "1.0") :: extractRealLiterals e)
 
@@ -37,7 +37,7 @@ struct
                                        BE_Node2 (SOME BT_Predicate, Keyword "<=", BE_Leaf (SOME BT_Real, RealLiteral x), BE_Leaf (SOME BT_Real, RealLiteral y))
                                      else
                                        BE_Node2 (SOME BT_Predicate, Keyword "<=", BE_Leaf (SOME BT_Real, RealLiteral y), BE_Leaf (SOME BT_Real, RealLiteral x))) pairList
-                                       
+
             end
       in
         (makeIntegerLiteralConditions integerList) @ (makeRealLiteralConditions realList) @ (Utils.deleteDouble Utils.eqto (extractAndMakeSetSubstractionConditions e))
@@ -123,10 +123,10 @@ struct
       (case simplifyCondition (BE_Commutative (SOME BT_Predicate, Keyword "&", l)) of
         (BE_Commutative (_, Keyword "&", l)) => l
       | res => [res])
-      
+
   val callCounter = ref 0
-  
-  fun tryApplying (pattern1, pattern2) oldConditions newConditions = 
+
+  fun tryApplying (pattern1, pattern2) oldConditions newConditions =
       let
         (* 簡易的な条件のリスト化を推論規則について行う。条件の階層の統一（上から順に積、和、否定）を推論規則に対して施すかどうかは未定 *)
         val pattern1List = case pattern1 of (BE_Commutative (_, Keyword "&", l)) => l | _ => [pattern1]
@@ -298,7 +298,7 @@ struct
         val alle1 = List.map (AST.mapExprTree (rewriteAllEqualExpr (e1, e2))) targets
         val alle2 = List.map (AST.mapExprTree (rewriteAllEqualExpr (e2, e1))) targets
       in
-        Utils.deleteDouble AST.eqExprs (alle1 @ alle2) 
+        Utils.deleteDouble AST.eqExprs (alle1 @ alle2)
       end
 
   (* 整数と集合において a <= b と a : POW (b) がプリミティブで、a < b, b > a, b >= a, a <: b, a <<: b, a /<: b, a /<<: b, a = b, a /= b が非プリミティブである前提 *)
@@ -367,7 +367,7 @@ struct
     | rewriteEqualExprInExprWithUpperCondition upperConditions e = rewriteEqualExprInExprWithUpperCondition upperConditions (BE_Commutative (SOME BT_Predicate, Keyword "&", [e]))
 
   fun rewriteEqualExprInPredicateWithUpperCondition uc (BP e) = BP (rewriteEqualExprInExprWithUpperCondition uc e)
-  
+
   fun rewriteImplicitConditionsInOperation false upperConditions (BOp (oprName, outputs, inputs, BS_Precondition (p, s))) = BOp (oprName, outputs, inputs, BS_Precondition (rewriteEqualExprInPredicateWithUpperCondition upperConditions p, s))
     | rewriteImplicitConditionsInOperation _     upperConditions (BOp (oprName, outputs, inputs, s)) = BOp (oprName, outputs, inputs, AST.mapPredicatesInSubstitutionTree (rewriteEqualExprInPredicateWithUpperCondition upperConditions) s)
 

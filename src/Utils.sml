@@ -29,8 +29,8 @@ struct
   (* リストの先頭から各要素をfに引数として渡して、初めてtrueが返ったところでリストを二分する。
      初めてtrueが返った要素（境界の要素）は返り値の2つめのリストの先頭となる。 *)
   fun firstSlice _ [] = ([], [])
-    | firstSlice f (x :: xs) = if (f x) then ([], x :: xs) else 
-        let 
+    | firstSlice f (x :: xs) = if (f x) then ([], x :: xs) else
+        let
           val (nxs, r) = firstSlice f xs
         in
           (x :: nxs, r)
@@ -39,8 +39,8 @@ struct
   (* リストの各要素をfに引数として渡して、trueが返った場合はその要素を区切りとしてリストをスライスする。
      trueとなる要素が連続していた場合や始端・終端にあった場合でも、スライス結果に空リストは含まない。 *)
   fun chopList f [] = []
-    | chopList f l = 
-      let 
+    | chopList f l =
+      let
         fun chopListAux f [] = [[]]
           | chopListAux f (x :: xs) =
             let
@@ -53,17 +53,17 @@ struct
       end
 
   (* 文字列を構成する文字が全て大文字ならtrue, そうでなければfalseを返す。 *)
-  fun isAllUpper s = 
+  fun isAllUpper s =
       List.all (fn x => Char.isUpper x) (String.explode s)
 
   (* =を等価の基準としてxが変化しなくなるまでfを適用する。 *)
-  fun repeatApply f x = 
+  fun repeatApply f x =
       let
         val res = f x
       in
-        if res = x then 
-          x 
-        else 
+        if res = x then
+          x
+        else
           repeatApply f res
       end
 
@@ -89,7 +89,7 @@ struct
         open TextIO
         val strm = openOut fname
       in
-        output (strm, stringData);  
+        output (strm, stringData);
         closeOut strm
       end
 
@@ -256,14 +256,14 @@ struct
           x * (powerInt x (y - 1))
 
   (* 自然数を桁数を固定して0を詰めた文字列にする。 *)
-  fun intToFixedString 1 x = 
+  fun intToFixedString 1 x =
       if
         0 <= x andalso x < 10
       then
         Int.toString x
       else
         raise UtilsError "out of range"
-    | intToFixedString d x = 
+    | intToFixedString d x =
       if
         d < 0 orelse x < 0
       then
@@ -312,8 +312,8 @@ struct
       end
     else
       ""
-      
-  (* リストlの要素を空のグループがないようにn個のグループに分ける全てのパターンを列挙する。 
+
+  (* リストlの要素を空のグループがないようにn個のグループに分ける全てのパターンを列挙する。
      グループの順番が違うものは区別するが各グループ内の要素の順番が違うものは区別しない。 *)
   fun grouping n l =
     let
@@ -330,7 +330,7 @@ struct
       fun distribute xl = List.map (fn k => List.map (fn (elem, _) => elem) (List.filter (fn (_, j) => k = j) xl)) range
     in
       if n <= 0 then
-        raise UtilsError "the number of group must be a positive number" 
+        raise UtilsError "the number of group must be a positive number"
       else
         List.filter (fn pat => List.all (fn g => g <> []) pat) (List.map distribute (groupingAux l))
     end
@@ -351,6 +351,6 @@ struct
         raise UtilsError "invalid argument value (minus)"
       else
         (s ^ (repeatString s (n - 1)))
-        
+
 
 end

@@ -2,7 +2,7 @@ structure Match =
 struct
   (* マッチング結果として規則内の変数を表すときに使うデータ構造 *)
   datatype TRSVar = TRSV of (BType option * BToken)
-  
+
   exception MatchError of string
 
   (* 規則と対象の型の整合をtrue/falseで返す。 *)
@@ -70,7 +70,7 @@ struct
           NONE => mergeTrsv vs ((TRSV (tp1Opt, v1), e1) :: l)
         | (SOME (_, e2)) => if eqExprsWithTypes e1 e2 then mergeTrsv vs l else NONE
       end
-     
+
   (* マッチング候補のリスト2つから整合するものをマージしてリストにする。 *)
   fun mergeTrsvCandidates [] l2 = []
     | mergeTrsvCandidates l1 [] = []
@@ -87,7 +87,7 @@ struct
         mtcAux l1 l2
       end
 
-  fun localVarsPerm vl1 vl2 = 
+  fun localVarsPerm vl1 vl2 =
       let
         val p2 = Utils.perm vl2
         val vl1trsv = List.map (fn v => TRSV (NONE, v)) vl1
@@ -106,7 +106,7 @@ struct
         SOME [[(TRSV (tp1Opt, VarSingle x), e)]]
       else
         NONE
-        
+
     | matchExpr (BE_Leaf (tp1Opt, (Var x))) e =
       if
         matchType tp1Opt (TypeInference.typeOf e)
@@ -114,7 +114,7 @@ struct
         SOME [[(TRSV (tp1Opt, Var x), e)]]
       else
         NONE
-        
+
     | matchExpr (BE_Leaf (tp1Opt, VarLit x)) e =
       if
         matchType tp1Opt (TypeInference.typeOf e) andalso
@@ -123,7 +123,7 @@ struct
         SOME [[(TRSV (tp1Opt, VarLit x), e)]]
       else
         NONE
-    
+
     | matchExpr (BE_Leaf (tp1Opt, VarTypeSet x)) e =
       if
         matchType tp1Opt (TypeInference.typeOf e) andalso
@@ -132,7 +132,7 @@ struct
         SOME [[(TRSV (tp1Opt, VarTypeSet x), e)]]
       else
         NONE
-        
+
     | matchExpr (BE_Leaf (tp1Opt, tk1)) (BE_Leaf (tp2Opt, tk2)) =
       if
         (matchType tp1Opt tp2Opt) andalso (tk1 = tk2)
@@ -140,7 +140,7 @@ struct
         SOME [[]]
       else
         NONE
-      
+
     | matchExpr (BE_Node1 (tp1Opt, tk1, e1)) (BE_Node1 (tp2Opt, tk2, e2)) =
       if
         (matchType tp1Opt tp2Opt) andalso (tk1 = tk2)
@@ -161,7 +161,7 @@ struct
       in
         if res = [] then NONE else SOME res
       end
-  
+
 
     | matchExpr (BE_Node2 (tp1Opt, tk1, e11, e12)) (BE_Node2 (tp2Opt, tk2, e21, e22)) =
       if
@@ -181,7 +181,7 @@ struct
       if
         (matchType tp1Opt tp2Opt) andalso (tk1 = tk2) andalso (List.length es1 = List.length es2) andalso
         (
-          ListPair.all (fn (e1, e2) => matchExpr e1 e2 <> NONE) (es1, es2) 
+          ListPair.all (fn (e1, e2) => matchExpr e1 e2 <> NONE) (es1, es2)
         )
       then
         let
@@ -193,7 +193,7 @@ struct
       else
         NONE
 
-    | matchExpr (BE_Fnc (tp1Opt, e11, e12)) (BE_Fnc (tp2Opt, e21, e22)) = 
+    | matchExpr (BE_Fnc (tp1Opt, e11, e12)) (BE_Fnc (tp2Opt, e21, e22)) =
       if
         matchType tp1Opt tp2Opt
       then
@@ -206,7 +206,7 @@ struct
         end
       else
         NONE
-    | matchExpr (BE_Img (tp1Opt, e11, e12)) (BE_Img (tp2Opt, e21, e22)) = 
+    | matchExpr (BE_Img (tp1Opt, e11, e12)) (BE_Img (tp2Opt, e21, e22)) =
       matchExpr (BE_Fnc (tp1Opt, e11, e12)) (BE_Fnc (tp2Opt, e21, e22))
 
     | matchExpr (BE_Bool (BP e1)) (BE_Bool (BP e2)) = matchExpr e1 e2
@@ -251,8 +251,8 @@ struct
         end
       else
         NONE
- 
-    | matchExpr (BE_InSet (tp1Opt, tks1, BP e1)) (BE_InSet (tp2Opt, tks2, BP e2)) = 
+
+    | matchExpr (BE_InSet (tp1Opt, tks1, BP e1)) (BE_InSet (tp2Opt, tks2, BP e2)) =
       if
         matchType tp1Opt tp2Opt
       then
@@ -260,7 +260,7 @@ struct
       else
         NONE
 
-    | matchExpr (BE_ForAll (tks1, BP e11, BP e12)) (BE_ForAll (tks2, BP e21, BP e22)) = 
+    | matchExpr (BE_ForAll (tks1, BP e11, BP e12)) (BE_ForAll (tks2, BP e21, BP e22)) =
       if
         List.length tks1 = List.length tks2
       then
@@ -274,7 +274,7 @@ struct
         end
       else
         NONE
- 
+
     | matchExpr (expr1 as BE_Exists (tks1, BP e1)) (expr2 as BE_Exists (tks2, BP e2)) =
       if
         List.length tks1 = List.length tks2
@@ -288,7 +288,7 @@ struct
         end
       else
         NONE
-    
+
     | matchExpr (BE_Lambda (tp1Opt, tks1, BP e11, e12)) (BE_Lambda (tp2Opt, tks2, BP e21, e22)) =
       if
         matchType tp1Opt tp2Opt
@@ -296,7 +296,7 @@ struct
         matchExpr (BE_ForAll (tks1, BP e11, BP e12)) (BE_ForAll (tks2, BP e21, BP e22))
       else
         NONE
-    
+
     | matchExpr (BE_Sigma (tp1Opt, tk1,  BP e11, e12)) (BE_Sigma (tp2Opt, tk2,  BP e21, e22)) =
         matchExpr (BE_Lambda (tp1Opt, [tk1], BP e11, e12)) (BE_Lambda (tp2Opt, [tk2], BP e21, e22))
 
@@ -304,10 +304,10 @@ struct
         matchExpr (BE_Lambda (tp1Opt, [tk1], BP e11, e12)) (BE_Lambda (tp2Opt, [tk2], BP e21, e22))
 
     | matchExpr (BE_Inter (tp1Opt, tks1, BP e11, e12)) (BE_Inter (tp2Opt, tks2, BP e21, e22)) =
-        matchExpr (BE_Lambda (tp1Opt, tks1,  BP e11, e12)) (BE_Lambda (tp2Opt, tks2,  BP e21, e22)) 
+        matchExpr (BE_Lambda (tp1Opt, tks1,  BP e11, e12)) (BE_Lambda (tp2Opt, tks2,  BP e21, e22))
 
     | matchExpr (BE_Union (tp1Opt, tks1, BP e11, e12)) (BE_Union (tp2Opt, tks2, BP e21, e22)) =
-        matchExpr (BE_Lambda (tp1Opt, tks1,  BP e11, e12)) (BE_Lambda (tp2Opt, tks2,  BP e21, e22)) 
+        matchExpr (BE_Lambda (tp1Opt, tks1,  BP e11, e12)) (BE_Lambda (tp2Opt, tks2,  BP e21, e22))
 
     | matchExpr (BE_Struct (to1, l1)) (BE_Struct (to2, l2)) =
       if
@@ -325,12 +325,12 @@ struct
         end
       else
         NONE
-        
+
     | matchExpr (BE_Rec (to1, l1)) (BE_Rec (to2, l2)) =
       if
-        matchType to1 to2 andalso 
+        matchType to1 to2 andalso
         List.length l1 = List.length l2 andalso
-        ListPair.allEq (fn ((_, e1), (_, e2)) => matchExpr e1 e2 <> NONE) (l1, l2) 
+        ListPair.allEq (fn ((_, e1), (_, e2)) => matchExpr e1 e2 <> NONE) (l1, l2)
       then
         let
           val unwrapped = ListPair.map (fn ((_, e1), (_, e2)) => valOf (matchExpr e1 e2)) (l1, l2)
@@ -384,7 +384,7 @@ struct
                   val numberOfExtendedVars = List.length patternExtendedVars
 
                   (* 部分的マッチング候補と残りのオペランドのリストの組を引数として受け取り、通常変数も含めたマッチング候補を返す関数 *)
-                  fun matchExtendedVars (partialMatchResult, rest) = 
+                  fun matchExtendedVars (partialMatchResult, rest) =
                       let
                         (* マッチング対象の残りのオペランドを通常変数の個数にグループ分けする方法を全パターン列挙する。 *)
                         val groupPatterns = Utils.grouping numberOfExtendedVars rest
@@ -474,7 +474,7 @@ struct
 
     (* マッチング結果による変数の書き換え *)
   fun rewriteVar ((TRSV (tp1Opt, v1), pattern) :: l) (BE_Leaf (_, v2)) = if eqAsPatternVar v1 v2 then pattern else rewriteVar l (BE_Leaf (NONE, v2))
-    
+
     (* 書き換え対象の変数を書き換えられなかった（書き換え前のパターンに存在しない変数が書き換え後のパターンに出現している）場合 *)
     | rewriteVar [] (BE_Leaf (_, Var        x)) = raise MatchError "invalid rule"
     | rewriteVar [] (BE_Leaf (_, VarLit     _)) = raise MatchError "invalid rule"
@@ -489,11 +489,11 @@ struct
       case matchExpr pattern1 target of
         NONE => rewriteExpr rls target
       | SOME l => if AST.eqExprs pattern1 pattern2 then target else (AST.mapExprTree (rewriteVar (hd l)) pattern2) handle _ => raise MatchError (Stringify.exprToString pattern1)
-      (* rewriteVar (hd l) の部分ではマッチングに成功した書き換え規則のうち1つしか適用しないことを表している。 
+      (* rewriteVar (hd l) の部分ではマッチングに成功した書き換え規則のうち1つしか適用しないことを表している。
          遅延評価を用いると他の候補にかかる計算コストを削減できる可能性がある *)
 
   fun rewriteVarTypeSet (BE_Leaf (SOME (BT_Power tOpt), VarTypeSet _)) = TypeInference.typeToExpr tOpt
     | rewriteVarTypeSet e = e
-    
+
 end
 

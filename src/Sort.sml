@@ -3,9 +3,9 @@ struct
   exception SortError of string
 
   val random_ = Random.rand (1, 1)
-  
+
   fun randomBool () = Random.randRange (0, 1) random_  = 1
-  
+
   fun isTyping typeSets (BE_Node2 (_, Keyword ":", BE_Leaf (_, Var _), expr)) =
       let
         fun isTypeSet (BE_Leaf (_, Keyword "INTEGER")) = true
@@ -30,7 +30,7 @@ struct
         BE_Commutative (SOME BT_Predicate, Keyword "&", (typings @ others))
       end
     | makeTypingsFirst _ e = e
-    
+
   fun exprToString (BE_Leaf _) = " "
     | exprToString (BE_Node1 (_, Keyword operatorString, _))    = operatorString
     | exprToString (BE_Node2 (_, Keyword operatorString, _, _)) = operatorString
@@ -51,11 +51,11 @@ struct
     | exprToString (BE_Struct _) = "Struct"
     | exprToString (BE_Rec _)    = "Rec"
     | exprToString (BE_RcAc _)   = "RcAc"
-    | exprToString (BE_Commutative (_, Keyword operatorString, _)) = operatorString 
+    | exprToString (BE_Commutative (_, Keyword operatorString, _)) = operatorString
     | exprToString _ = raise SortError "invalid expression"
 
   val relationPool = ref [] : (BExpr * BExpr) list ref (* 推移的順序関係のプール *)
-  
+
   fun compareTransitive x y =
       if
         AST.eqExprs x y
@@ -71,7 +71,7 @@ struct
         SOME GREATER
       else
         NONE
-    
+
   fun addRelation (x, y) =
       case compareTransitive x y of
         SOME EQUAL   => () (* x と y が等しいため変化なし *)
@@ -102,7 +102,7 @@ struct
   fun addStaticRelations (BMch (_, mchParams, clauses)) =
       let
         val sets       = case List.find (fn (BC_SETS       _) => true | _ => false) clauses of NONE => [] | SOME (BC_SETS       l) => l | _ => raise SortError ""
-        
+
         val cconstants = case List.find (fn (BC_CCONSTANTS _) => true | _ => false) clauses of NONE => [] | SOME (BC_CCONSTANTS l) => l | _ => raise SortError ""
         val aconstants = case List.find (fn (BC_ACONSTANTS _) => true | _ => false) clauses of NONE => [] | SOME (BC_ACONSTANTS l) => l | _ => raise SortError ""
         val cvariables = case List.find (fn (BC_CVARIABLES _) => true | _ => false) clauses of NONE => [] | SOME (BC_CVARIABLES l) => l | _ => raise SortError ""
@@ -114,8 +114,8 @@ struct
         val propertiesOpt  = List.find (fn (BC_PROPERTIES  _) => true | _ => false) clauses
         val invariantOpt   = List.find (fn (BC_INVARIANT   _) => true | _ => false) clauses
         (* ASSERTIONS は無視 *)
-        val operationBody  = case operation of BOp (_, _, _, BS_Precondition (_, s)) => s | BOp (_, _, _, s) => s (* 事前条件を除いた操作の代入文 *) 
-        
+        val operationBody  = case operation of BOp (_, _, _, BS_Precondition (_, s)) => s | BOp (_, _, _, s) => s (* 事前条件を除いた操作の代入文 *)
+
         val (mchParamTypeSetExprs, mchParamNotTypeSetExprs) = List.partition (fn (BE_Leaf (NONE, Var idStr)) => TypeInference.isTypeSetByName idStr | _ => raise SortError "invalid var") (List.map (fn v => BE_Leaf (NONE, v)) mchParams)
         val deferredSetExprs    =              List.map (fn (BT_Deferred x)     =>                   BE_Leaf (NONE, Var x) | _ => raise SortError "")       (List.filter (fn (BT_Deferred _) => true | _ => false) sets)
         val enumSetExprs        =              List.map (fn (BT_Enum (x, _))    =>                   BE_Leaf (NONE, Var x) | _ => raise SortError "")       (List.filter (fn (BT_Enum     _) => true | _ => false) sets)
@@ -137,7 +137,7 @@ struct
             in
               List.map (fn s => BE_Leaf (NONE, Var s)) (Utils.deleteDouble Utils.eqto fieldStrings)
             end
-            
+
         fun extractRecordFieldsInSubstitution (BS_Block            s               ) = extractRecordFieldsInSubstitution s
           | extractRecordFieldsInSubstitution BS_Identity                            = []
           | extractRecordFieldsInSubstitution (BS_Precondition     (BP e, s       )) = Utils.deleteDouble Utils.eqto ((extractRecordFieldsInExpr e) @ (extractRecordFieldsInSubstitution s))
@@ -160,7 +160,7 @@ struct
         val recordFieldsInProperties  = case propertiesOpt  of NONE => [] | SOME (BC_PROPERTIES  (BP e)) => extractRecordFieldsInExpr e | _ => raise SortError "" (* PROPERTIES 〃 *)
         val recordFieldsInInvariant   = case invariantOpt   of NONE => [] | SOME (BC_INVARIANT   (BP e)) => extractRecordFieldsInExpr e | _ => raise SortError "" (* INVARIANT 〃 *)
         val recordFieldsInOperation   = extractRecordFieldsInSubstitution operationBody                                                 (* 事前条件以外の代入文 〃 *)
-        
+
         fun addLocalVarRelationsInExpr minSet (BE_Leaf        _                       ) = ()
           | addLocalVarRelationsInExpr minSet (BE_Node1       (_   , _    , e        )) = addLocalVarRelationsInExpr minSet e
           | addLocalVarRelationsInExpr minSet (BE_Node2       (_   , _    , e1   , e2)) = (addLocalVarRelationsInExpr minSet e1; addLocalVarRelationsInExpr minSet e2)
@@ -169,7 +169,7 @@ struct
           | addLocalVarRelationsInExpr minSet (BE_Img         (_   , e1   , e2       )) = (addLocalVarRelationsInExpr minSet e1; addLocalVarRelationsInExpr minSet e2)
           | addLocalVarRelationsInExpr minSet (BE_Bool        (BP e                  )) = addLocalVarRelationsInExpr minSet e
           | addLocalVarRelationsInExpr minSet (BE_ExSet       (_   , l               )) = List.app (addLocalVarRelationsInExpr minSet) l
-          | addLocalVarRelationsInExpr minSet (BE_InSet       (_   , vl   , BP e     )) = 
+          | addLocalVarRelationsInExpr minSet (BE_InSet       (_   , vl   , BP e     )) =
             let
               val newMinSet = List.map (fn v => BE_Leaf (NONE, v)) vl
             in
@@ -276,7 +276,7 @@ struct
         addMaxSetRelations avariableExprs;
         addMaxSetRelations outputExprs;
         addMaxSetRelations inputExprs;
-        
+
         addMaxSetRelations recordFieldsInConstraints;
         addMaxSetRelations recordFieldsInProperties;
         addMaxSetRelations recordFieldsInInvariant;
@@ -365,7 +365,7 @@ struct
         if
           e1Ord = NONE orelse e1Ord = SOME EQUAL
         then
-          compareExprs expr12 expr22 
+          compareExprs expr12 expr22
         else
           e1Ord
       end
@@ -717,7 +717,7 @@ struct
       let
         val esLenOrd = SOME (Int.compare ((List.length es1), (List.length es2))) (* 左辺の変数の数が少ない方が先 *)
       in
-        if 
+        if
           esLenOrd = SOME EQUAL
         then
           let
@@ -747,7 +747,7 @@ struct
               iparamsLenOrd = SOME EQUAL
             then
               let
-                val oparamsOrd = compareExprLists oparams1 oparams2 
+                val oparamsOrd = compareExprLists oparams1 oparams2
               in
                 if
                   oparamsOrd = NONE orelse oparamsOrd = SOME EQUAL
@@ -874,7 +874,7 @@ struct
         else
           ()(* 部分式の関係が拮抗していた場合 *)
       end
-      
+
   fun getOrderInExprList l = List.app (fn e1 => List.app (fn e2 => if compareExprs e1 e2 = NONE then addRelationBySubExpr e1 e2 else ()) l) l
 
   fun getOrderOfVars [v] = ()
@@ -884,7 +884,7 @@ struct
       in
         getOrderInExprList exprs
       end
-            
+
   fun isFixed (f : 'a -> 'a -> order option) l = List.all (fn e1 => List.all (fn e2 => f e1 e2 <> NONE) l) l (* 一意にソート可能であるかを判定 *)
 
   fun getOrderInExpr (BE_Node2       (_ , Keyword "=", e1, e2)) = getOrderInExprList [e1, e2]
@@ -902,7 +902,7 @@ struct
 
   fun getOrderInTopExprTree (BE_Leaf   _                          ) = ()
     | getOrderInTopExprTree (BE_Node1  (_   , _    , e           )) = getOrderInTopExprTree e
-    
+
     | getOrderInTopExprTree (equalExpr as (BE_Node2 (_, Keyword "=", e1, e2))) =
       if
         isFixed compareExprs [e1, e2]
@@ -955,7 +955,7 @@ struct
     | addRelationBySubExprInSubstitutionTrees (BS_Select           l1                ) (BS_Select           l2                ) = (ListPair.app (fn ((SOME (BP e1), _), (SOME (BP e2), s2)) => addRelationBySubExpr e1 e2
                                                                                                                                                   | _                                       => ())
                                                                                                                                                 (l1, l2);
-                                                                                                                                   ListPair.app (fn (b1, b2) => addRelationBySubExprInSubstitutionTrees (#2(b1)) (#2(b2))) (l1, l2)) 
+                                                                                                                                   ListPair.app (fn (b1, b2) => addRelationBySubExprInSubstitutionTrees (#2(b1)) (#2(b2))) (l1, l2))
     | addRelationBySubExprInSubstitutionTrees (BS_Case             _                 ) _                                        = raise SortError "not primitive substitution"
     | addRelationBySubExprInSubstitutionTrees _                                        (BS_Case             _                 ) = raise SortError "not primitive substitution"
     | addRelationBySubExprInSubstitutionTrees (BS_Any              (_    , BP e1, s1)) (BS_Any              (_    , BP e2, s2)) = (addRelationBySubExpr e1 e2; addRelationBySubExprInSubstitutionTrees s1 s2)
@@ -968,7 +968,7 @@ struct
     | addRelationBySubExprInSubstitutionTrees (BS_BecomesEqualList _                 ) _                                        = raise SortError "not primitive substitution"
     | addRelationBySubExprInSubstitutionTrees _                                        (BS_BecomesEqualList _                 ) = raise SortError "not primitive substitution"
     | addRelationBySubExprInSubstitutionTrees (BS_Simultaneous     l1                ) (BS_Simultaneous     l2                ) = List.app (fn s1 => List.app (fn s2 => addRelationBySubExprInSubstitutionTrees s1 s2) l2) l1
-    | addRelationBySubExprInSubstitutionTrees _                                        _                                        = raise SortError "substitution for IMPLEMENTATION" 
+    | addRelationBySubExprInSubstitutionTrees _                                        _                                        = raise SortError "substitution for IMPLEMENTATION"
 
   fun getOrderInSubstitutionList l = List.app (fn s1 => List.app (fn s2 => if compareSubstitutions s1 s2 = NONE then addRelationBySubExprInSubstitutionTrees s1 s2 else ()) l) l
 
@@ -978,7 +978,7 @@ struct
     | getOrderInSubstitution _ = ()
 
   fun sortSubstitutionList l = ListMergeSort.sort (fn (s1, s2) => compareSubstitutions s1 s2 = SOME GREATER) l (* 引数のリストの要素のうちどの2つをとっても順序が定まっているときにしか実行しない前提 *)
-        
+
   fun getOrderInTopSubstitutionTree (BS_Block            s                ) = getOrderInTopSubstitutionTree s
     | getOrderInTopSubstitutionTree BS_Identity                             = ()
     | getOrderInTopSubstitutionTree (BS_Precondition     (BP e, s        )) = (getOrderInTopExprTree e; getOrderInTopSubstitutionTree s)
@@ -1047,7 +1047,7 @@ struct
     | addRandomRelationInSubstitutionTrees (BS_Select           l1                ) (BS_Select           l2                ) = (ListPair.app (fn ((SOME (BP e1), _), (SOME (BP e2), s2)) => addRandomRelation e1 e2
                                                                                                                                                   | _                                       => ())
                                                                                                                                                 (l1, l2);
-                                                                                                                                   ListPair.app (fn (b1, b2) => addRandomRelationInSubstitutionTrees (#2(b1)) (#2(b2))) (l1, l2)) 
+                                                                                                                                   ListPair.app (fn (b1, b2) => addRandomRelationInSubstitutionTrees (#2(b1)) (#2(b2))) (l1, l2))
     | addRandomRelationInSubstitutionTrees (BS_Any              (_    , BP e1, s1)) (BS_Any              (_    , BP e2, s2)) = (addRandomRelation e1 e2; addRandomRelationInSubstitutionTrees s1 s2)
     | addRandomRelationInSubstitutionTrees (BS_BecomesElt       (l1   , e1       )) (BS_BecomesElt       (l2   , e2       )) = (ListPair.app (Utils.uncurry addRandomRelation) (l1, l2); addRandomRelation e1 e2)
     | addRandomRelationInSubstitutionTrees (BS_BecomesSuchThat  (l1   , BP e1    )) (BS_BecomesSuchThat  (l2   , BP e2    )) = (List.app (fn elm1 => List.app (fn elm2 => addRandomRelation elm1 elm2) l2) l1; addRandomRelation e1 e2)
@@ -1068,7 +1068,7 @@ struct
     | addRandomRelationInSubstitution (BS_Call (_, el1, el2)) = List.app addRandomRelationInExprTree (el1 @ el2)
     | addRandomRelationInSubstitution (BS_BecomesEqual (e1, e2)) = (addRandomRelationInExprTree e1; addRandomRelationInExprTree e2)
     | addRandomRelationInSubstitution (BS_Simultaneous l) = addRandomRelationInSubstitutionList l
-    | addRandomRelationInSubstitution s = () (* 事前条件は除く *) 
+    | addRandomRelationInSubstitution s = () (* 事前条件は除く *)
 
   fun addRandomRelationInSubstitutionTree s = AST.appSubstitutionTree addRandomRelationInSubstitution s
 
@@ -1095,7 +1095,7 @@ struct
     | addRandomRelationInClause (BC_SETS ts) = addRandomRelationInTypes ts
     | addRandomRelationInClause (BC_OPERATIONS [opr]) = addRandomRelationInOperation opr
     | addRandomRelationInClause _ = ()
-    
+
   (* 可換な部分について全て順序が求められているかを調べ、定まっていない場合はランダムに順序を決定して追加 (事前条件以外) *)
   fun addRandomRelationInComponent (BMch (_, machineParameters, clauses)) =
       (
@@ -1107,7 +1107,7 @@ struct
           List.app addRandomRelationInClause sortedClauses
         end)
     | addRandomRelationInComponent _ = raise SortError "sorting is only for models"
-    
+
   (*************************************** 以下ソート用関数 ***************************************)
 
   (* sortExprList の定義は↑ *)
@@ -1187,8 +1187,8 @@ struct
                                | _                => raise SortError "")
         val setExprList = case List.find (fn (BC_SETS _) => true | _ => false) clauses of
                             NONE             => []
-                          | SOME (BC_SETS l) => List.concat (List.map (fn (ty as BT_Enum     (typeSet, elements)) => (BE_Leaf (SOME (BT_Power (SOME ty)), Var typeSet)) :: (List.map (fn element => (BE_Leaf (NONE, Var element))) elements)                         
-                                                                        | (ty as BT_Deferred typeSet            ) => [(BE_Leaf (SOME (BT_Power (SOME ty)), Var typeSet))] 
+                          | SOME (BC_SETS l) => List.concat (List.map (fn (ty as BT_Enum     (typeSet, elements)) => (BE_Leaf (SOME (BT_Power (SOME ty)), Var typeSet)) :: (List.map (fn element => (BE_Leaf (NONE, Var element))) elements)
+                                                                        | (ty as BT_Deferred typeSet            ) => [(BE_Leaf (SOME (BT_Power (SOME ty)), Var typeSet))]
                                                                         | _                                 => raise SortError "") l)
                           | _                => raise SortError ""
         val aconstantsExprList = case (List.find (fn (BC_ACONSTANTS _) => true | _ => false) clauses) of
@@ -1211,7 +1211,7 @@ struct
         val operationParameterExprList = case operation of (BOp (_, outputs, inputs, _)) => List.map (fn v => BE_Leaf (NONE, v)) (outputs @ inputs)
 
         val globalIdentExprList = machineParameterExprList @ aconstantsExprList @ cconstantsExprList @ avariablesExprList @ cvariablesExprList @ operationParameterExprList
-        
+
         val constraintsOpt = List.find (fn (BC_CONSTRAINTS _) => true | _ => false) clauses
         val propertiesOpt  = List.find (fn (BC_PROPERTIES  _) => true | _ => false) clauses
         val invariantOpt   = List.find (fn (BC_INVARIANT   _) => true | _ => false) clauses
@@ -1239,13 +1239,13 @@ struct
 
         val operationBody       = case operation of BOp (_, _, _, BS_Precondition (_, s   )) => s      | BOp (_, _, _, s) => s    (* 事前条件を除いた操作の代入文 *)
         val preconditionExprOpt = case operation of BOp (_, _, _, BS_Precondition (BP e, _)) => SOME e | _                => NONE (* 事前条件 option *)
-        
+
         val _ = List.app (fn (BE_Node2 (_, Keyword ":", e1, BE_Node1 (_, Keyword k, e2))) => if k = "POW" orelse k = "FIN" then addRelation (e1, e2) else ()
                            | (BE_Node2 (_, Keyword k  , e1, e2                         )) => if k = "<=" orelse k = "<" orelse k = "<:" orelse k = "<<:" then addRelation (e1, e2) else ()
                            | _                                                            => ())
                          staticConditionList
 
-          
+
         fun getOrder () =
             (
               (case constraintsOpt of
@@ -1263,7 +1263,7 @@ struct
               getOrderInTopSubstitutionTree operationBody;
               getOrderInExprList globalIdentExprList (* モデル変数等についての順序を求める *)
             )
-            
+
         fun getOrderCycle () = (* 新しく順序が判明しなくなるまで繰り返す *)
             let
               val initialLength = List.length (!relationPool)
@@ -1299,6 +1299,6 @@ struct
         AST.mapExprsInComponent (makeTypingsFirst userTypeSetList) (BMch (machineName, sortedMachineParameters, sortedClauses))
       end)
     | sort _ = raise SortError "input component is not abstract machine"
-    
+
 end
 

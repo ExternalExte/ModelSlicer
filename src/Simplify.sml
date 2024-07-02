@@ -15,11 +15,11 @@ exception SimplifyError of string
     (* 整数リテラル + 整数リテラル *)
 fun simplify (BE_Node2 (SOME BT_Integer, Keyword "+", BE_Leaf (_, IntegerLiteral e1val), BE_Leaf (_, IntegerLiteral e2val))) =
     BE_Leaf (SOME BT_Integer, IntegerLiteral (e1val + e2val))
-   
+
     (* 実数リテラル + 実数リテラル *)
   | simplify (BE_Node2 (SOME BT_Real, Keyword "+", BE_Leaf (_, RealLiteral e1val), BE_Leaf (_, RealLiteral e2val))) =
     BE_Leaf (SOME BT_Real, RealLiteral (e1val `+ e2val))
-    
+
     (* 整数リテラル - 整数リテラル *)
   | simplify (BE_Node2 (SOME BT_Integer, Keyword "-", BE_Leaf (_, IntegerLiteral e1val), BE_Leaf (_, IntegerLiteral e2val))) =
     BE_Leaf (SOME BT_Integer, IntegerLiteral (e1val - e2val))
@@ -49,7 +49,7 @@ fun simplify (BE_Node2 (SOME BT_Integer, Keyword "+", BE_Leaf (_, IntegerLiteral
     in
       BE_Commutative (SOME BT_Integer, Keyword "+", (if litOperands = [] then nonlitOperands else (lite :: nonlitOperands)))
     end
-  
+
     (* 実数リテラル + 実数リテラル (可換) *)
   | simplify (BE_Commutative (SOME BT_Real, Keyword "+", el)) =
     let
@@ -82,7 +82,7 @@ fun simplify (BE_Node2 (SOME BT_Integer, Keyword "+", BE_Leaf (_, IntegerLiteral
 
   | simplify (BE_Node2 (_, Keyword ":", BE_Leaf (_, Keyword "TRUE" ), BE_Leaf (_, Keyword "BOOL"))) = BE_Leaf (SOME BT_Predicate, Keyword "btrue")
   | simplify (BE_Node2 (_, Keyword ":", BE_Leaf (_, Keyword "FALSE"), BE_Leaf (_, Keyword "BOOL"))) = BE_Leaf (SOME BT_Predicate, Keyword "btrue")
-  
+
     (* 整数の単項マイナスを符号としてリテラル内に押し込める *)
   | simplify (BE_Node1 (SOME BT_Integer, Keyword "-", BE_Leaf (SOME BT_Integer, IntegerLiteral value))) =
       BE_Leaf (SOME BT_Integer, IntegerLiteral (~value))
@@ -127,7 +127,7 @@ and
   simplifyExprTree e =
     let
       val simplified = Utils.repeatApply (fn x => Utils.pam x [AST.mapExprTree simplify, AST.mapExprTree Commutative.flattenCommutative]) e
-      
+
       (* リテラル内に押し込めた符号を整数は単項マイナス、実数は0.0からの引き算として可視化する *)
       fun restoreMinus (BE_Leaf (SOME BT_Integer, IntegerLiteral value)) =
           if
@@ -143,7 +143,7 @@ and
             BE_Node2 (SOME BT_Real, Keyword "-", BE_Leaf (SOME BT_Real, RealLiteral (BReal.fromString "0.0")), BE_Leaf (SOME BT_Real, RealLiteral value))
           else
             BE_Leaf (SOME BT_Real, RealLiteral value)
-          
+
         | restoreMinus e = e
     in
       AST.mapExprTree restoreMinus simplified
@@ -153,7 +153,7 @@ and
     if
       i1 <= i2
     then
-      BE_Leaf (SOME BT_Predicate, Keyword "btrue") 
+      BE_Leaf (SOME BT_Predicate, Keyword "btrue")
     else
       BE_Leaf (SOME BT_Predicate, Keyword "bfalse")
   | deleteLiteralCondition (BE_Node2 (_, Keyword "<=", (BE_Leaf (_, IntegerLiteral i1)), (BE_Leaf (_, Keyword "MAXINT")))) =
@@ -176,7 +176,7 @@ and
     then
       BE_Leaf (SOME BT_Predicate, Keyword "btrue")
     else
-      BE_Leaf (SOME BT_Predicate, Keyword "bfalse")  
+      BE_Leaf (SOME BT_Predicate, Keyword "bfalse")
   | deleteLiteralCondition (BE_Node2 (_, Keyword "<=", (BE_Leaf (_, Keyword "MININT")), (BE_Leaf (_, IntegerLiteral i2)))) =
     if
       ~2147483648 <= i2

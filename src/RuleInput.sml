@@ -22,7 +22,7 @@ struct
           else
             false
       end
-      
+
   fun strToRules str =
     let
       val ruleLines = Utils.tokensS "\n" str
@@ -63,7 +63,7 @@ struct
           else
             BE_Leaf (tOpt, Var x)
         | interpretSuffix e = e
-      
+
       val litRules = List.map (fn (e1, e2) => (AST.mapExprTree interpretSuffix e1, AST.mapExprTree interpretSuffix e2)) commutativeFlattenedRules
     in
       litRules

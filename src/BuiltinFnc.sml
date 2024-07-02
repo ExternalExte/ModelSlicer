@@ -53,7 +53,7 @@ struct
   (* 2引数組み込み関数 *)
   val bi2FncStr = [
       "arity",     (* e, e *) (* t *) (* pow (pair (pow (pair (i, i)), x)) pow (pair (i, i)) -> i *)
-      "const",     (* e, e *) (* t *) (* x pow (pair (i, pow (pair (pow (pair (i, i)), x)))) -> pow (pair (pow (pair (i, i)), x)) *) 
+      "const",     (* e, e *) (* t *) (* x pow (pair (i, pow (pair (pow (pair (i, i)), x)))) -> pow (pair (pow (pair (i, i)), x)) *)
       "father",    (* e, e *) (* t *) (* pow (pair (pow (pair (i, i)), x)) pow (pair (i, i)) -> pow (pair (i, i)) *)
       "iterate",   (* e, e *) (* p *) (* pow (pair (x, x)) i -> pow (pair (x, x)) *)
       "prj1",      (* e, e *) (* p *) (* pow x pow y -> pow (pair (pair (x, y), x)) *)

@@ -40,7 +40,7 @@ struct
   fun extractIdsInSubstitution (BS_Block s)                     = extractIdsInSubstitution s
     | extractIdsInSubstitution BS_Identity                      = []
     | extractIdsInSubstitution (BS_Precondition (BP e, s))      = Utils.deleteDouble Utils.eqto ((extractIdsInSubstitution s) @ (extractIdsInExpr e))
-    | extractIdsInSubstitution (BS_Assertion (BP e, s))         = Utils.deleteDouble Utils.eqto ((extractIdsInExpr e) @ extractIdsInSubstitution s) 
+    | extractIdsInSubstitution (BS_Assertion (BP e, s))         = Utils.deleteDouble Utils.eqto ((extractIdsInExpr e) @ extractIdsInSubstitution s)
     | extractIdsInSubstitution (BS_Choice sl)                   = Utils.deleteDouble Utils.eqto (List.concat (List.map extractIdsInSubstitution sl))
     | extractIdsInSubstitution (BS_If l)                        = Utils.deleteDouble Utils.eqto (List.concat (List.map (fn (NONE, s) => extractIdsInSubstitution s | (SOME (BP e), s) => (extractIdsInExpr e) @ (extractIdsInSubstitution s)) l))
     | extractIdsInSubstitution (BS_Select l)                    = Utils.deleteDouble Utils.eqto (List.concat (List.map (fn (NONE, s) => extractIdsInSubstitution s | (SOME (BP e), s) => (extractIdsInExpr e) @ (extractIdsInSubstitution s)) l))
@@ -56,7 +56,7 @@ struct
     | extractIdsInSubstitution (BS_LocalVariable (_, s))        = extractIdsInSubstitution s
     | extractIdsInSubstitution (BS_Sequencing sl)               = Utils.deleteDouble Utils.eqto (List.concat (List.map extractIdsInSubstitution sl))
     | extractIdsInSubstitution (BS_While (BP e1, s, BP e2, e3)) = Utils.deleteDouble Utils.eqto ((extractIdsInSubstitution s) @ (extractIdsInExpr e1) @ (extractIdsInExpr e2) @ (extractIdsInExpr e3))
-      
+
   fun exprToConditionList (BE_Commutative (_, Keyword "&", l)) = l
     | exprToConditionList (BE_Leaf (_, Keyword "btrue")) = []
     | exprToConditionList e = [e]
@@ -67,13 +67,13 @@ struct
             let
               val usedVars = extractIdsInExpr cond
             in
-              Utils.intersectionAsSet Utils.eqto usedVars necessaryVarList <> [] andalso         (* 必要な変数が条件内にある *) 
+              Utils.intersectionAsSet Utils.eqto usedVars necessaryVarList <> [] andalso         (* 必要な変数が条件内にある *)
               Utils.substractionAsSet Utils.eqto usedVars (constantList @ necessaryVarList) = [] (* 定数と必要な変数以外のユーザ定義識別子が存在しない *)
             end
       in
         List.filter deleteUnnecessaryConditionsAux conditionList
       end
-      
+
   (* 不要な変数宣言や事前条件を削除 (ANYをどうするかは考え中) *)
   fun deleteUnusedVars constantList (BS_Precondition (BP p, s))  =
       let
@@ -106,7 +106,7 @@ struct
   fun extract referenceModels component refinedVars changedInOriginalOperation =
       let
 (* ↓データの取り出し *)
-          
+
         val (name, refiningMachineNameOpt, params, clauses) = case component of
                                                              BMch (n,    p, c) => (n, NONE  , p, c)
                                                            | BRef (n, r, p, c) => (n, SOME r, p, c)
@@ -170,10 +170,10 @@ struct
         val newSubstitution = AST.mapSubstitutionTree (deleteUnusedVars allConstants) substitution
 
         val usedIdsInNewSubstitution = (extractIdsInSubstitution newSubstitution) @ refinedVars
-        
+
         val newOutputParams   = Utils.intersectionAsSet Utils.eqto outputParams   usedIdsInNewSubstitution
         val newInputParams    = Utils.intersectionAsSet Utils.eqto inputParams    usedIdsInNewSubstitution
-        
+
         val newAVariablesList = Utils.intersectionAsSet Utils.eqto avariablesList usedIdsInNewSubstitution
         val newCVariablesList = Utils.intersectionAsSet Utils.eqto cvariablesList usedIdsInNewSubstitution
 
@@ -197,10 +197,10 @@ struct
 
         val usedIdsInNewInvariant = Utils.deleteDouble Utils.eqto (List.concat (List.map extractIdsInExpr newInvariantList))
         val usedIdsInNewInvariantAndSubstitution = Utils.deleteDouble Utils.eqto (usedIdsInNewSubstitution @ usedIdsInNewInvariant)
-        
+
         val newAConstantsList = Utils.intersectionAsSet Utils.eqto aconstantsList usedIdsInNewInvariantAndSubstitution
         val newCConstantsList = Utils.intersectionAsSet Utils.eqto cconstantsList usedIdsInNewInvariantAndSubstitution
-        
+
         val newPropertiesList = deleteUnnecessaryConditions (setsIdList @ params) (newAConstantsList @ newCConstantsList) propertiesList
 
         val usedIdsInNewProperties = Utils.deleteDouble Utils.eqto (List.concat (List.map extractIdsInExpr newPropertiesList))
@@ -211,14 +211,14 @@ struct
                                                                      Utils.intersectionAsSet Utils.eqto (List.map (fn y => Var y) elms) usedVarsConstsAndSets <> []
                                         | _                       => raise ExtractConditionsError "") setsList
         val newSetsIdList = List.concat (List.map (fn (BT_Deferred x) => [Var x] | (BT_Enum (x, elms)) => (Var x) :: (List.map (fn y => Var y) elms) |  _ => raise ExtractConditionsError "") newSetsList)
-        
+
         val allUsedIds = Utils.deleteDouble Utils.eqto (newSetsIdList @ usedVarsConstsAndSets)
 
          (* 暫定的なものなので左辺がこのコンポーネント(実装)で使われているかどうかで判断し、再帰的に抽出しない。また、IMPORTしたモデル内の定数(変数も？)が右辺に使われている場合を想定しない *)
         val newValuesList = List.filter (fn (v, _) => Utils.isIn v allUsedIds) valuesList
-        
+
         val newParams = Utils.intersectionAsSet Utils.eqto params allUsedIds
-        
+
         val newConstraintsList = deleteUnnecessaryConditions [] newParams constraintsList
 
 
@@ -236,13 +236,13 @@ struct
               | _                        => raise ExtractConditionsError ""
             end
           | operationExists _                 _    = false (* モデル以外はここで無視 *)
-          
+
         val usedModelNameList = List.map (fn (BMch (mn, _, _)) => mn | _ => raise ExtractConditionsError "") (List.filter (fn m => List.exists (operationExists m) calledOperations) referenceModels)
-        
+
         val newIncludesList = List.filter (fn (BMchInst (Var mName, _)) => Utils.isIn mName usedModelNameList | _ => raise ExtractConditionsError "Renamed or invalid machine name in INCLUDES") includesList
-        
+
         val newImportsList  = List.filter (fn (BMchInst (Var mName, _)) => Utils.isIn mName usedModelNameList | _ => raise ExtractConditionsError "Renamed or invalid machine name in IMPORTS" ) importsList
-        
+
 (* ↑参照節のリスト作成 *)
 (* ↓節の構成 *)
         val newConstraints = case newConstraintsList of
@@ -258,7 +258,7 @@ struct
                              | [e] => [(BC_INVARIANT   (BP e))]
                              | l   => [(BC_INVARIANT   (BP (BE_Commutative (SOME BT_Predicate, Keyword "&", l))))]
         val newOperations = [(BC_OPERATIONS [(BOp (oprName, newOutputParams, newInputParams, newSubstitution))])]
-                             
+
         val newAVariables = case newAVariablesList of [] => [] | l => [(BC_AVARIABLES l)]
         val newCVariables = case newCVariablesList of [] => [] | l => [(BC_CVARIABLES l)]
         val newAConstants = case newAConstantsList of [] => [] | l => [(BC_ACONSTANTS l)]
@@ -266,7 +266,7 @@ struct
 
         val newSets = case newSetsList of [] => [] | l => [(BC_SETS l)]
         val newValues = case newValuesList of [] => [] | l => [(BC_VALUES l)]
-        
+
         val newIncludes = case newIncludesList of [] => [] | l => [(BC_INCLUDES l)]
         val newImports  = case newImportsList  of [] => [] | l => [(BC_IMPORTS  l)]
 

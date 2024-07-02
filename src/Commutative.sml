@@ -13,7 +13,7 @@ struct
       | makeCommutative x = x
 
     fun flattenCommutative (BE_Commutative (_,  _, [e])) = e
-      | flattenCommutative (BE_Commutative (tp, Keyword tk, l)) = 
+      | flattenCommutative (BE_Commutative (tp, Keyword tk, l)) =
         let
           fun fcAux [] = []
             | fcAux ((BE_Commutative (tpS, Keyword tkS, lS)) :: r) =

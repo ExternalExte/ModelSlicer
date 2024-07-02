@@ -1,25 +1,25 @@
-datatype BToken = 
+datatype BToken =
   Var            of string
 | Renamed        of string * string
 | VarLit         of string (* 書き換え・暗黙の条件の導出規則においてリテラルのみにマッチする変数 *)
 | VarSingle      of string (* 制限付き変数 (可換で結合的な演算においてただ1個のオペランドにマッチする *)
 | VarTypeSet     of string (* 型集合にマッチする変数 *)
-| IntegerLiteral of IntInf.int 
-| StringLiteral  of string 
-| RealLiteral    of BReal.bReal 
-| Keyword        of string 
+| IntegerLiteral of IntInf.int
+| StringLiteral  of string
+| RealLiteral    of BReal.bReal
+| Keyword        of string
 and
-  BType = 
+  BType =
   BT_Real
-| BT_Integer 
-| BT_String 
-| BT_Float 
-| BT_Bool 
-| BT_Power    of BType option 
-| BT_Pair     of BType option * BType option 
-| BT_Struct   of (BType * string) list 
-| BT_Deferred of string 
-| BT_Enum     of string * string list 
+| BT_Integer
+| BT_String
+| BT_Float
+| BT_Bool
+| BT_Power    of BType option
+| BT_Pair     of BType option * BType option
+| BT_Struct   of (BType * string) list
+| BT_Deferred of string
+| BT_Enum     of string * string list
 | BT_Predicate
   (* 関数、関係は BT_Power (SOME BT_Pair _) *)
   (* 集合定数"INTEGER"の型は BT_Power (SOME BT_Integer) *)
@@ -50,8 +50,8 @@ and
   BPredicate = BP of BExpr (* 条件式 *)
 and
   (* 制約条件系・Assertion *)
-  BClause = 
-  BC_CONSTRAINTS of BPredicate 
+  BClause =
+  BC_CONSTRAINTS of BPredicate
 | BC_PROPERTIES  of BPredicate
 | BC_INVARIANT   of BPredicate
 | BC_ASSERTIONS  of BPredicate
@@ -59,7 +59,7 @@ and
 
 (* モジュール系 *)
 (* モデル展開後にはこれらは登場しない *)
-| BC_SEES     of BMchInstanciation list 
+| BC_SEES     of BMchInstanciation list
 | BC_INCLUDES of BMchInstanciation list
 | BC_PROMOTES of BMchInstanciation list
 | BC_EXTENDS  of BMchInstanciation list
@@ -78,9 +78,9 @@ and
 | BC_OPERATIONS     of BOperation list
 | BC_DEFINITIONS    of BToken list
 and
-  BComponent = 
-  BMch of string * BToken list * BClause list 
-| BRef of string * string * BToken list * BClause list 
+  BComponent =
+  BMch of string * BToken list * BClause list
+| BRef of string * string * BToken list * BClause list
 | BImp of string * string * BToken list * BClause list
 and
   (*                  操作名,  outputs,      inputs,       操作 *)
@@ -88,7 +88,7 @@ and
 and
   BMchInstanciation = BMchInst of BToken * BExpr list
 and
-  BSubstitution = 
+  BSubstitution =
   BS_Block              of BSubstitution (* BEGIN *)
 | BS_Identity (* skip *)
 | BS_Precondition       of BPredicate * BSubstitution
@@ -134,7 +134,7 @@ struct
     | mapExprTree f (BE_Struct      (t, l))             = f (BE_Struct      (t, List.map (fn (s, e) => (s, mapExprTree f e)) l))
     | mapExprTree f (BE_Rec         (t, l))             = f (BE_Rec         (t, List.map (fn (s, e) => (s, mapExprTree f e)) l))
     | mapExprTree f (BE_RcAc        (t, e, s))          = f (BE_RcAc        (t, mapExprTree f e, s))
-    
+
   fun appExprTree f (expr as (BE_Leaf        _                       )) = f expr
     | appExprTree f (expr as (BE_Node1       (_   , _    , e        ))) = (appExprTree f e; f expr)
     | appExprTree f (expr as (BE_Node2       (_   , _    , e1   , e2))) = (appExprTree f e1; appExprTree f e2; f expr)
@@ -179,12 +179,12 @@ struct
     | subExprTrees (BE_Rec         (t, l))             = List.map (fn (s, e) => e) l
     | subExprTrees (BE_RcAc        (t, e, s))          = [e]
 
-  fun findExprTree f e = 
+  fun findExprTree f e =
       if
         f e
-      then 
-        SOME e 
-      else 
+      then
+        SOME e
+      else
         let
           val tmp = List.find (Utils.neqto NONE) (List.map (findExprTree f) (subExprTrees e))
         in
@@ -193,7 +193,7 @@ struct
           | SOME x => x
         end
 
-  fun findExprs f e = 
+  fun findExprs f e =
       let
         val tmp = List.concat (List.map (findExprs f) (subExprTrees e))
       in
@@ -207,7 +207,7 @@ struct
 
 
   (* 代入文の書き換え用 *)
-  fun mapSubstitutionTree f (BS_Block s)                     = f (BS_Block (mapSubstitutionTree f s))    
+  fun mapSubstitutionTree f (BS_Block s)                     = f (BS_Block (mapSubstitutionTree f s))
     | mapSubstitutionTree f BS_Identity                      = f BS_Identity
     | mapSubstitutionTree f (BS_Precondition (p, s))         = f (BS_Precondition (p, mapSubstitutionTree f s))
     | mapSubstitutionTree f (BS_Assertion (p, s))            = f (BS_Assertion (p, mapSubstitutionTree f s))
@@ -256,7 +256,7 @@ struct
           | SOME x => x
         end
 
-  fun findSubstitutions f s = 
+  fun findSubstitutions f s =
       let
         val tmp = List.concat (List.map (findSubstitutions f) (subSubstitutionTrees s))
       in
@@ -296,7 +296,7 @@ struct
   (* 式の書き換え用 *)
   fun mapExprsInPredicate f (BP e) = BP (mapExprTree f e)
 
-  fun mapExprsInSubstitutionTree f (BS_Block s)                     = BS_Block (mapExprsInSubstitutionTree f s)    
+  fun mapExprsInSubstitutionTree f (BS_Block s)                     = BS_Block (mapExprsInSubstitutionTree f s)
     | mapExprsInSubstitutionTree f BS_Identity                      = BS_Identity
     | mapExprsInSubstitutionTree f (BS_Precondition (p, s))         = BS_Precondition (mapExprsInPredicate f p, mapExprsInSubstitutionTree f s)
     | mapExprsInSubstitutionTree f (BS_Assertion (p, s))            = BS_Assertion (mapExprsInPredicate f p, mapExprsInSubstitutionTree f s)
@@ -371,7 +371,7 @@ struct
     | identExistsInExpr (BE_Rec (to, l)) v = List.exists (fn (_, e) => identExistsInExpr e v) l
     | identExistsInExpr (BE_RcAc (to, e, str)) v = identExistsInExpr e v
     | identExistsInExpr (BE_Commutative (to, operator, el)) v = List.exists (fn e => identExistsInExpr e v) el
-  
+
   fun identExistsInSubstitution (BS_Block s) v = identExistsInSubstitution s v
     | identExistsInSubstitution BS_Identity v = false
     | identExistsInSubstitution (BS_Precondition (BP e, s)) v =
@@ -433,13 +433,13 @@ struct
     | mapVarsInExpr _ e = e
 
   fun mapVarsInMachineInst f (BMchInst (v, el)) = BMchInst (f v, List.map (mapVarsInExpr f) el)
-  
+
   fun mapVarsInSubstitution f (BS_Any           (tl, p, s))             = BS_Any (List.map f tl, p, s)
     | mapVarsInSubstitution f (BS_Let           (l,  s))                = BS_Let (List.map (fn (v, e) => (f v, mapVarsInExpr f e)) l, s)
     | mapVarsInSubstitution f (BS_LocalVariable (tl, s))                = BS_LocalVariable (List.map f tl, s)
     | mapVarsInSubstitution f (BS_Call          (opr, outputs, inputs)) = BS_Call (f opr, List.map (mapVarsInExpr f) outputs, List.map (mapExprTree (mapVarsInExpr f)) inputs)
     | mapVarsInSubstitution f s                                         = s
-    
+
   fun mapVarsInOperation f (BOp (oprName, outputs, inputs, s)) = BOp (oprName , List.map f outputs, List.map f inputs, mapSubstitutionTree (mapVarsInSubstitution f) (mapExprsInSubstitutionTree (mapVarsInExpr f) s))
 
   fun mapVarsInClause f (BC_CONSTRAINTS (BP e)) = BC_CONSTRAINTS (BP (mapExprTree (mapVarsInExpr f) e))
@@ -528,15 +528,15 @@ struct
       end
 
    fun genString () = Int.toString (genInt ())
-   
+
    fun genStringList 0 = []
      | genStringList n = (genString ()) :: (genStringList (n - 1))
 
   (* 型は無視する式の等価性判定 (a + b = b + a) *)
   (* 空のコメントをつけた式は局所変数関連で改善が必要 *)
   (* 変数名の重複はないと仮定する *) (* ←重複解消前に使わないこと *)
-  fun eqExprs (BE_Leaf        (_    , tk1                     )) (BE_Leaf        (_    , tk2                     )) = (tk1 = tk2) 
-    | eqExprs (BE_Node1       (_    , tk1        , e1         )) (BE_Node1       (_    , tk2        , e2         )) = (tk1 = tk2) andalso (eqExprs e1 e2) 
+  fun eqExprs (BE_Leaf        (_    , tk1                     )) (BE_Leaf        (_    , tk2                     )) = (tk1 = tk2)
+    | eqExprs (BE_Node1       (_    , tk1        , e1         )) (BE_Node1       (_    , tk2        , e2         )) = (tk1 = tk2) andalso (eqExprs e1 e2)
     | eqExprs (BE_Node2       (_    , Keyword "=", e11   , e12)) (BE_Node2       (_    , Keyword "=", e21   , e22)) = ((eqExprs e11 e21) andalso (eqExprs e12 e22)) orelse ((eqExprs e12 e21) andalso (eqExprs e11 e22))
     | eqExprs (BE_Node2       (_    , tk1        , e11   , e12)) (BE_Node2       (_    , tk2        , e21   , e22)) = (tk1 = tk2) andalso (eqExprs e11 e21) andalso (eqExprs e12 e22)
     | eqExprs (BE_NodeN       (_    , tk1        , es1        )) (BE_NodeN       (_    , tk2        , es2        )) = (tk1 = tk2) andalso ListPair.allEq (Utils.uncurry eqExprs) (es1, es2)
@@ -625,11 +625,11 @@ struct
         else
           let
             val newIdStrList = genStringList len1
-            
+
             fun rwExpr (localVarStr, newIdStr) e = mapExprTree (mapIdsInExpr (fn idStr => if idStr = localVarStr then newIdStr else idStr)) e
             fun rwListExpr ((localVarStr, newIdStr) :: rest) e = rwExpr (localVarStr, newIdStr) (rwListExpr rest e)
               | rwListExpr []                                e = e
-              
+
             fun rwSubstitution (localVarStr, newIdStr) s = mapExprsInSubstitutionTree (mapIdsInExpr (fn idStr => if idStr = localVarStr then newIdStr else idStr)) s
             fun rwListSubstitution ((localVarStr, newIdStr) :: rest) s = rwSubstitution (localVarStr, newIdStr) (rwListSubstitution rest s)
               | rwListSubstitution []                                s = s
@@ -660,11 +660,11 @@ struct
         else
           let
             val newIdStrList = genStringList len1
-            
+
             fun rwExpr (localVarStr, newIdStr) e = mapExprTree (mapIdsInExpr (fn idStr => if idStr = localVarStr then newIdStr else idStr)) e
             fun rwListExpr ((localVarStr, newIdStr) :: rest) e = rwExpr (localVarStr, newIdStr) (rwListExpr rest e)
               | rwListExpr []                                e = e
-              
+
             fun rwSubstitution (localVarStr, newIdStr) s = mapExprsInSubstitutionTree (mapIdsInExpr (fn idStr => if idStr = localVarStr then newIdStr else idStr)) s
             fun rwListSubstitution ((localVarStr, newIdStr) :: rest) s = rwSubstitution (localVarStr, newIdStr) (rwListSubstitution rest s)
               | rwListSubstitution []                                s = s
@@ -674,7 +674,7 @@ struct
 
             val rewriteTable1 = ListPair.zip (varStrList1, newIdStrList)
             val rewriteTable2 = ListPair.zip (varStrList2, newIdStrList)
-            
+
             val rewrittenExprList1 = List.map (fn (_, e) => rwListExpr rewriteTable1 e) l1
             val rewrittenExprList2 = List.map (fn (_, e) => rwListExpr rewriteTable2 e) l2
 
@@ -704,13 +704,13 @@ struct
         val esList1 = ListPair.zip (es11, es12)
         val esList2 = ListPair.zip (es21, es22)
       in
-        List.length esList1 = List.length esList2 andalso 
+        List.length esList1 = List.length esList2 andalso
         Utils.eqAsMset (fn (e11, e12) => fn (e21, e22) => eqExprs e11 e21 andalso eqExprs e12 e22) esList1 esList2
       end
 
     | eqSubstitutions (BS_Simultaneous ss1)             (BS_Simultaneous ss2)             =
         List.length ss1 = List.length ss2 andalso Utils.eqAsMset eqSubstitutions ss1 ss2                  (* 順不同 *)
-        
+
     | eqSubstitutions (BS_LocalVariable (tks1, s1)) (BS_LocalVariable (tks2, s2)) = (* 順不同・局所変数 *)
       let
         val len1 = List.length tks1
@@ -735,7 +735,7 @@ struct
             List.exists (eqSubstitutions rewrittenS1) rewrittenS2List
           end
       end
-    
+
     | eqSubstitutions (BS_Sequencing ss1)               (BS_Sequencing ss2)               =
         List.length ss1 = List.length ss2 andalso
         ListPair.all (Utils.uncurry eqSubstitutions) (ss1, ss2) (* 代入文の順番が異なる場合はfalse *)
@@ -745,7 +745,7 @@ struct
         eqPredicates p12 p22 andalso
         eqExprs e1 e2
     | eqSubstitutions s1 s2 = false (* 代入文の種類が異なる場合はfalse *)
- 
+
   fun eqOperations (BOp (name1, outputs1, inputs1, s1), BOp (name2, outputs2, inputs2, s2)) =
       name1    = name2    andalso
       outputs1 = outputs2 andalso
@@ -772,7 +772,7 @@ struct
         ListPair.all (fn (BMchInst (x1, es1), BMchInst (x2, es2)) => x1 = x2 andalso ListPair.all (Utils.uncurry eqExprs) (es1, es2)) (l1, l2)
     | eqClauses (BC_IMPORTS l1)  (BC_IMPORTS l2)  =
         ListPair.all (fn (BMchInst (x1, es1), BMchInst (x2, es2)) => x1 = x2 andalso ListPair.all (Utils.uncurry eqExprs) (es1, es2)) (l1, l2)
-        
+
     | eqClauses (BC_INITIALISATION s1) (BC_INITIALISATION s2) = eqSubstitutions s1 s2
 
     | eqClauses (BC_OPERATIONS os1)    (BC_OPERATIONS os2)    = ListPair.all eqOperations (os1, os2)
@@ -784,12 +784,12 @@ struct
 
     | eqClauses (BC_SETS l1)           (BC_SETS l2)           = l1 = l2
     | eqClauses (BC_DEFINITIONS l1)    (BC_DEFINITIONS l2)    = l1 = l2
- 
+
     | eqClauses _ _ = false
- 
+
   fun eqComponents (BMch (mchName1,           prms1, clauses1)) (BMch (mchName2,           prms2, clauses2)) =
         mchName1 = mchName2 andalso
-        Utils.eqAsMset Utils.eqto prms1 prms2 andalso 
+        Utils.eqAsMset Utils.eqto prms1 prms2 andalso
         List.length clauses1 = List.length clauses2 andalso
         Utils.eqAsSet eqClauses clauses1 clauses2
     | eqComponents (BRef (refName1, mchName1, prms1, clauses1)) (BRef (refName2, mchName2, prms2, clauses2)) =
@@ -825,7 +825,7 @@ struct
     | mapPredicatesInExpr f (BE_Inter  (to,  tks, p, e)) = BE_Inter (to, tks, f p, e)
     | mapPredicatesInExpr f (BE_Union  (to,  tks, p, e)) = BE_Union (to, tks, f p, e)
     | mapPredicatesInExpr f e                            = e
-  
+
   fun mapPredicatesInSubstitutionTree f s = mapExprsInSubstitutionTree (mapPredicatesInExpr f) (mapSubstitutionTree (mapPredicatesInSubstitution f) s)
 
   fun isSubExpr e1 e2 = (findExprTree (eqExprs e1) e2) <> NONE (* 「e1がe2の部分式のとき」trueを返す。e1とe2が等しい場合もtrueとなる。 *)
@@ -882,7 +882,7 @@ struct
     | extractReferenceVarsRhs (BE_RcAc (to, e, str)) = extractReferenceVarsRhs e
     | extractReferenceVarsRhs (BE_Commutative (to, opName, el)) =
       Utils.deleteDouble Utils.eqto (List.concat (List.map extractReferenceVarsRhs el))
-      
+
   (* 元 OperationDivision.extractReferenceVarsLhs *)
   (* 代入文の左辺の式から参照する識別子を抽出する *)
       (* BExpr -> BToken list *)
@@ -890,7 +890,7 @@ struct
   fun extractReferenceVarsLhs (BE_Leaf (to, Var _)) = []
     | extractReferenceVarsLhs (BE_Fnc (to, e1, e2)) = extractReferenceVarsRhs e2
     | extractReferenceVarsLhs _ = []
-    
+
   (* 元 OperationDivision.extractReferenceVarsLhs *)
   (* 代入文の左辺の式から参照する識別子を抽出する *)
       (* BExpr -> BToken list *)
@@ -905,7 +905,7 @@ struct
       (* 代入文 -> ([変更変数], [参照変数]) *)
   fun extractVars (BS_Block s) = extractVars s
     | extractVars BS_Identity = ([], [])
-    | extractVars (BS_Precondition (BP e, s)) = 
+    | extractVars (BS_Precondition (BP e, s)) =
       let
         val (nextChangedVars, nextReferenceVars) = extractVars s
         val referenceVars = extractReferenceVarsRhs e
@@ -964,7 +964,7 @@ struct
       in
         ((Utils.deleteDouble Utils.eqto changedVars), (Utils.deleteDouble Utils.eqto referenceVars))
       end
-    | extractVars (BS_Let (l, s)) = 
+    | extractVars (BS_Let (l, s)) =
       let
         val lvl = List.foldr (fn ((var, _), vl) => var :: vl) [] l
         val (changedVarsInSubstitutions, referenceVarsInSubstitutions) = extractVars s
@@ -996,14 +996,14 @@ struct
       in
         ((Utils.deleteDouble Utils.eqto changedVars), (Utils.deleteDouble Utils.eqto referenceVars))
       end
-    | extractVars (BS_BecomesEqual (e1, e2)) = 
+    | extractVars (BS_BecomesEqual (e1, e2)) =
       let
         val changedVars = extractChangedVarsLhs e1
         val referenceVars = (extractReferenceVarsLhs e1) @ (extractReferenceVarsRhs e2)
       in
         ((Utils.deleteDouble Utils.eqto changedVars), (Utils.deleteDouble Utils.eqto referenceVars))
       end
-    | extractVars (BS_BecomesEqualList (sl1, sl2)) = 
+    | extractVars (BS_BecomesEqualList (sl1, sl2)) =
       let
         val changedVars = List.concat (List.map extractChangedVarsLhs sl1)
         val referenceVars = List.concat ((List.map extractReferenceVarsLhs sl1) @ (List.map extractReferenceVarsRhs sl2))
@@ -1025,12 +1025,12 @@ struct
       in
         (changedVarsInSubstitutions, Utils.deleteDouble Utils.eqto (e1Vars @ e2Vars @ e3Vars @ referenceVarsInSubstitutions))
       end
-      
+
   (* 元 OperationDivision.extractVarsInSubstitutionList *)
   (* 代入文のリストから変更する識別子と参照する識別子を抽出する *)
       (* BSubstitution -> (BToken list) * (BToken list) *)
       (* [代入文] -> ([変更変数], [参照変数]) *)
-  and extractVarsInSubstitutionList sl =  
+  and extractVarsInSubstitutionList sl =
       let
         val (changedVars, referenceVars) =
           List.foldr (fn ((cvs1, rvs1), (cvs2, rvs2)) => ((cvs1 @ cvs2), (rvs1 @ rvs2)))

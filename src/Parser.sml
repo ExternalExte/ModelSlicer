@@ -1,11 +1,11 @@
 structure Parser =
 struct
   exception ParseError of string
-  
+
       (* 先にマシンの最後のENDを取り除く関数 *)
       (* BToken list -> BToken list *)
-  fun removeEnd alltks = 
-      case (rev alltks) of 
+  fun removeEnd alltks =
+      case (rev alltks) of
         ((Keyword "END") :: tks) => (rev tks)
       | _ => raise ParseError "missing END"
 
@@ -41,12 +41,12 @@ struct
     | distinguishRenamedVar x = x
 
   fun distinguishRenamedVarInComponent c = AST.mapVarsInComponent distinguishRenamedVar c
-  
+
       (* モデル全体の構文解析を行う関数 *)
       (* val parse : BToken list -> BComponent *)
-  fun parse ((Keyword "MACHINE") :: (Var machineName) :: (Keyword "(") :: btokens) = 
+  fun parse ((Keyword "MACHINE") :: (Var machineName) :: (Keyword "(") :: btokens) =
       let
-        val (v, r) = parseAux btokens 
+        val (v, r) = parseAux btokens
       in
         distinguishRenamedVarInComponent (BMch (machineName, v, (pClauses (removeEnd r))))
       end
@@ -132,7 +132,7 @@ struct
       in
         (BC_EXTENDS mis) :: (pClauses rest)
       end
-    | pClauses ((Keyword "USES") :: btks)               = 
+    | pClauses ((Keyword "USES") :: btks)               =
       let
         val (mis, rest) = pMachineInstanciationList btks
       in
@@ -200,7 +200,7 @@ struct
         val (s, rest) = pSubstitution btks
       in
         (BC_INITIALISATION s) :: (pClauses rest)
-      end        
+      end
     | pClauses ((Keyword "OPERATIONS") :: btks)         =
       let
         val (ops, rest) = pOperations btks
@@ -214,14 +214,14 @@ struct
         (BC_DEFINITIONS defTokens) :: (pClauses rest)
       end
     | pClauses _ = raise ParseError "unknown clause keyword"
-  and 
+  and
       (* SETS節をパースする関数 *)
       (* BToken list -> BType list * BToken list *)
       pSets [] = ([], [])
     | pSets ((Var x) :: (Keyword "=") :: (Keyword "{") :: btks) =
       let
         fun setsEnumElements ((Var xx) :: (Keyword "}") :: rr) = ([xx], rr)
-          | setsEnumElements ((Var xx) :: (Keyword ",") :: rr) = 
+          | setsEnumElements ((Var xx) :: (Keyword ",") :: rr) =
             let
               val (enext, rnext) = setsEnumElements rr
             in
@@ -256,7 +256,7 @@ struct
         (((BOp (x, [], [], s)) :: next), rest)
       end
     (* output複数 *)
-    | pOperations ((Var x) :: (Keyword ",") :: btks) = 
+    | pOperations ((Var x) :: (Keyword ",") :: btks) =
       let
         val ((BOp (n, oo, i, s) :: ops), rest) = pOperations btks
       in
@@ -304,7 +304,7 @@ struct
       (* BToken list -> BMchInstanciation list * BToken list *)
       pMachineInstanciationList [] = ([], [])
     | pMachineInstanciationList ((Keyword ",") :: btokens) = pMachineInstanciationList btokens
-    | pMachineInstanciationList ((Var x) :: (Keyword "(") :: btokens) = 
+    | pMachineInstanciationList ((Var x) :: (Keyword "(") :: btokens) =
       let
         val (ex1, rest1) = getNextEe 115 btokens
         fun paramlist ((Keyword ",") :: btks) =
@@ -333,18 +333,18 @@ struct
       (* 同時代入のパース *)
       (* BToken list -> BSubstitution * BToken list *)
       pSubstitution [] = raise ParseError "missing Substitution"
-    | pSubstitution btokens = 
+    | pSubstitution btokens =
       let
         val separator = ref (Keyword "")
-        fun pSubstitutionAux btks = 
+        fun pSubstitutionAux btks =
             let
-              val (s, r) = pSubstitutionSimple btks 
+              val (s, r) = pSubstitutionSimple btks
             in
               if
                 r <> [] andalso (hd r = Keyword "||" orelse hd r = Keyword ";")
               then
                 let
-                  val (ss, rr) = pSubstitutionAux (tl r) 
+                  val (ss, rr) = pSubstitutionAux (tl r)
                 in
                   separator := hd r ; (s :: ss, rr)
                 end
@@ -355,7 +355,7 @@ struct
           | flatten ((BS_Simultaneous x) :: xs) = x @  (flatten xs)
           | flatten ((BS_Sequencing x)   :: xs) = x @  (flatten xs)
           | flatten (x                   :: xs) = x :: (flatten xs)
-        val (subs, rest)                        = pSubstitutionAux btokens 
+        val (subs, rest)                        = pSubstitutionAux btokens
       in
         if
           List.length subs = 1
@@ -365,7 +365,7 @@ struct
           case !separator of
             (Keyword "||") => (BS_Simultaneous (Utils.repeatApply flatten subs), rest)
           | (Keyword ";")  => (BS_Sequencing   (Utils.repeatApply flatten subs), rest)
-          | _              => raise ParseError "invalid substitution separator" 
+          | _              => raise ParseError "invalid substitution separator"
       end
   and
       (* 同時代入以外の代入文のパース *)
@@ -385,7 +385,7 @@ struct
             raise ParseError "missing END of BEGIN"
       end
     | pSubstitutionSimple ((Keyword "skip") :: rest) = (BS_Identity, rest)
-    | pSubstitutionSimple ((Keyword "PRE") :: rest) = 
+    | pSubstitutionSimple ((Keyword "PRE") :: rest) =
       let
         val (p, r) = pPredicate rest
         val (s, rr) = pSubstitution (tl r)
@@ -405,7 +405,7 @@ struct
         else
           raise ParseError "missing END of ASSERT"
       end
-    | pSubstitutionSimple ((Keyword "CHOICE") :: btokens) = 
+    | pSubstitutionSimple ((Keyword "CHOICE") :: btokens) =
       let
         val (s1, r1) = pSubstitution btokens
         fun
@@ -446,8 +446,8 @@ struct
         val (ifBranches, restTokens) = substitutionIfAux ((Keyword "IF") :: btokens)
       in
         ((BS_If ifBranches), restTokens)
-      end   
-    | pSubstitutionSimple ((Keyword "ANY") :: btokens) = 
+      end
+    | pSubstitutionSimple ((Keyword "ANY") :: btokens) =
       let
         val (lvs, r) = pVarList btokens
         val (p, rr)  = pPredicate (tl r)
@@ -455,7 +455,7 @@ struct
       in
         if rrr <> [] andalso hd rrr = Keyword "END" then
           (BS_Any (lvs, p, s), tl rrr)
-        else 
+        else
           raise ParseError "missing END of ANY"
       end
     | pSubstitutionSimple ((Keyword "LET") :: btokens) =
@@ -474,11 +474,11 @@ struct
         else
           raise ParseError "missing END of LET"
       end
-    | pSubstitutionSimple ((Var x) :: restTokens) = 
+    | pSubstitutionSimple ((Var x) :: restTokens) =
       let
         fun lvarList ((Var y) :: (Keyword "(") :: r) =
             let
-              fun 
+              fun
                 lvarFpara ((Keyword "(") :: rr) =
                   let
                     val (ex, rrr) = pExpr rr
@@ -493,17 +493,17 @@ struct
                       raise ParseError "missing RIGHT BRACKET"
                   end
                 | lvarFpara rr = ([], rr)
-              fun 
+              fun
                 lvarFtree f [] = f
                 | lvarFtree f (e :: es) = lvarFtree (BE_Fnc (NONE, f, e)) es
               val (fps1, fps2) = lvarFpara ((Keyword "(") :: r)
               val (res1, res2) = lvarList fps2
             in
-              ((lvarFtree (BE_Leaf (NONE, Var y)) fps1) :: res1, res2) 
+              ((lvarFtree (BE_Leaf (NONE, Var y)) fps1) :: res1, res2)
             end
           | lvarList (recordtokens as ((Var y) :: (Keyword "AccessRecordField") :: btokens)) =
             let
-              fun 
+              fun
                 lvarRfield ((Var z) :: (Keyword "AccessRecordField") :: rr) =
                   let
                     val (flst, rrr) = lvarRfield rr
@@ -521,12 +521,12 @@ struct
               ((lvarRtree (BE_Leaf (NONE, Var (hd rfs))) (tl rfs)) :: res, r2)
             end
           | lvarList (Keyword "," :: r) = lvarList r
-          | lvarList ((Var y) :: r) = 
+          | lvarList ((Var y) :: r) =
             let
               val (lvs, rr) = lvarList r
             in
               ((BE_Leaf (NONE, Var y)) :: lvs, rr)
-            end 
+            end
           | lvarList r = ([], r)
         val (lvars, rest) = lvarList ((Var x) :: restTokens)
         fun lrvar lvs ((Keyword ":") :: (Keyword "(") :: btks) =
@@ -571,7 +571,7 @@ struct
                 (BS_Call (Var y, lvs, listingInputs extree), tl r)
               else
                 raise ParseError "missing RIGHT BRACKET"
-            end         
+            end
           | lrvar lvs ((Keyword "<--") :: (Var y) :: btks) = (BS_Call (Var y, lvs, []), btks)
           | lrvar lvs ((Keyword "<--") :: rest) = raise ParseError "invalid operation calling"
           | lrvar [(BE_Fnc (_, BE_Leaf (_, x), ex))] btks =
@@ -625,8 +625,8 @@ struct
                 [] => raise ParseError "CASE list ends with \"-\""
               | (x :: xs) => ((BE_Node1 (NONE, Keyword "-", x)) :: xs, rr)
               )
-            end              
-          | simpleTermList (stx :: r) = 
+            end
+          | simpleTermList (stx :: r) =
             let
               val (res1, res2) = simpleTermList r
             in
@@ -688,12 +688,12 @@ struct
          左結合演算式としてのパース結果と残りのトークン列を返す関数 *)
       (* int -> BToken list -> BExpr * BToken list *)
       pEeleft _ [] = raise ParseError "missing Expression"
-    | pEeleft pri btokens = 
+    | pEeleft pri btokens =
       let
         val oplst = List.map (fn (x, _, _) => Keyword x) (List.filter (fn (_, x, _) => x = pri) Priority.exprOperators)
         val pnext = getNextEe pri
         fun eeleftSubLst [] = ([], [])
-          | eeleftSubLst (opleft :: btks) = 
+          | eeleftSubLst (opleft :: btks) =
             if
               List.exists (Utils.eqto opleft) oplst
             then
@@ -717,7 +717,7 @@ struct
          右結合演算式としてのパース結果と残りのトークン列を返す関数 *)
       (* int -> BToken list -> BExpr * BToken list *)
       pEeright pri [] = raise ParseError "missing expresspion"
-    | pEeright pri btokens = 
+    | pEeright pri btokens =
       let
         val oplst = List.map (fn (x, _, _) => Keyword x) (List.filter (fn (_, x, _) => x = pri) Priority.exprOperators)
         val pnext = getNextEe pri
@@ -741,7 +741,7 @@ struct
         datatype P_FUNCS_DATA = PF_Evl of BExpr | PF_Img of BExpr | PF_Rvs
         val (funcexpr, rest1) = pRecordaccess btokens
         fun
-          funcsSubLst ((Keyword "(") :: btks) = 
+          funcsSubLst ((Keyword "(") :: btks) =
             let
               val (e, r) = pExpr btks
             in
@@ -754,7 +754,7 @@ struct
                   ((PF_Evl e) :: elst, rr)
                 end
             end
-          | funcsSubLst ((Keyword "[") :: btks) = 
+          | funcsSubLst ((Keyword "[") :: btks) =
             let
               val (e, r) = pExpr btks
             in
@@ -767,7 +767,7 @@ struct
                   ((PF_Img e) :: elst, rr)
                 end
             end
-          | funcsSubLst ((Keyword "~") :: btks) = 
+          | funcsSubLst ((Keyword "~") :: btks) =
             let
               val (elst, r) = funcsSubLst btks
             in
@@ -785,7 +785,7 @@ struct
   and
       (* 単項マイナス - x をパース *)
       (* BToken list -> BExpr * BToken list *)
-      pUminus ((Keyword "-") :: btokens) = 
+      pUminus ((Keyword "-") :: btokens) =
       let
         val (ex, rest) = (getNextEe 210) btokens
       in
@@ -796,10 +796,10 @@ struct
       (* レコードのフィールドへのアクセスの式 x ' y をパース *)
       (* BToken list -> BToken list *)
       pRecordaccess [] = raise ParseError "missing Expression"
-    | pRecordaccess btokens = 
+    | pRecordaccess btokens =
       let
         val pnext = getNextEe 250
-        fun raSubLst ((Keyword "'") :: (Var x) :: btks) = 
+        fun raSubLst ((Keyword "'") :: (Var x) :: btks) =
             let
               val (nextx, rr) = raSubLst btks
             in
@@ -816,7 +816,7 @@ struct
   and
       (* 式の構文木の末端、または括弧で囲まれた式をパース *)
       (* BToken list -> BExpr * BToken list *)
-      pPrimary ((Keyword "(") :: btokens) = 
+      pPrimary ((Keyword "(") :: btokens) =
       let
         val (brexpr, rest) = pExpr btokens
       in
@@ -836,7 +836,7 @@ struct
     | pPrimary ((Keyword "NAT") ::      btokens) = (BE_Leaf (SOME (BT_Power (SOME BT_Integer)),                        Keyword "NAT"),      btokens)
     | pPrimary ((Keyword "NAT1") ::     btokens) = (BE_Leaf (SOME (BT_Power (SOME BT_Integer)),                        Keyword "NAT1"),     btokens)
     | pPrimary ((StringLiteral x) ::    btokens) = (BE_Leaf (SOME BT_String,                                           StringLiteral x),    btokens)
-    | pPrimary ((Keyword "STRING") ::   btokens) = (BE_Leaf (SOME (BT_Power (SOME BT_String)),                         Keyword "STRING"),   btokens)    
+    | pPrimary ((Keyword "STRING") ::   btokens) = (BE_Leaf (SOME (BT_Power (SOME BT_String)),                         Keyword "STRING"),   btokens)
     | pPrimary ((RealLiteral x) ::      btokens) = (BE_Leaf (SOME BT_Real,                                             RealLiteral x),      btokens)
     | pPrimary ((Keyword "REAL") ::     btokens) = (BE_Leaf (SOME (BT_Power (SOME BT_Real)),                           Keyword "REAL"),     btokens)
     | pPrimary ((Keyword "FLOAT") ::    btokens) = (BE_Leaf (SOME (BT_Power (SOME BT_Real)),                           Keyword "FLOAT"),    btokens)
@@ -847,7 +847,7 @@ struct
     | pPrimary ((Keyword "bfalse") ::   btokens) = (BE_Leaf (SOME BT_Predicate,                                        Keyword "bfalse"),   btokens)
     | pPrimary ((Keyword "{}") ::       btokens) = (BE_Leaf (SOME (BT_Power NONE),                                     Keyword "{}"),       btokens)
     | pPrimary ((Keyword "[]") ::       btokens) = (BE_Leaf (SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, NONE)))), Keyword "[]"),       btokens)
-    | pPrimary ((Keyword "{") ::        btokens) = 
+    | pPrimary ((Keyword "{") ::        btokens) =
       let
         val (expr, rest1) = pExpr btokens
         fun listingElements (BE_Node2 (_, (Keyword ","), e1, e2)) = (listingElements e1) @ [e2]
@@ -855,7 +855,7 @@ struct
       in
         case rest1 of
           ((Keyword "}") :: rest2) => (BE_ExSet (NONE, listingElements expr), rest2)
-        | ((Keyword "|") :: rest2) => 
+        | ((Keyword "|") :: rest2) =>
           let
             val (p, rest3) = pPredicate rest2
           in
@@ -864,9 +864,9 @@ struct
             else
               (BE_InSet (NONE, List.map (fn (BE_Leaf (_, v)) => v | _ => raise ParseError "") (listingElements expr), p), tl rest3)
           end
-        | _ => raise ParseError "missing \"}\" of set"        
+        | _ => raise ParseError "missing \"}\" of set"
       end
-    | pPrimary ((Keyword "[") :: btokens) = 
+    | pPrimary ((Keyword "[") :: btokens) =
       let
         val (expr, rest) = pExpr btokens
         fun listingElements (BE_Node2 (_, (Keyword ","), e1, e2)) = (listingElements e1) @ [e2]
@@ -877,7 +877,7 @@ struct
         else
           (BE_Seq (NONE, listingElements expr), tl rest)
       end
-    | pPrimary ((Keyword "!") :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) = 
+    | pPrimary ((Keyword "!") :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) =
       let
         val (allp, rest) = pPredicate btokens
       in
@@ -891,8 +891,8 @@ struct
       end
     | pPrimary ((Keyword "!") :: (Keyword "(") :: (Var x) :: btokens) =
       let
-        fun bindExprList ((Keyword ",") :: (Var y) :: r) = 
-            let 
+        fun bindExprList ((Keyword ",") :: (Var y) :: r) =
+            let
               val (lst, rr) = bindExprList r
             in
               ((Var y) :: lst, rr)
@@ -910,10 +910,10 @@ struct
               (BE_ForAll (((Var x) :: exls), BP p1, BP p2), tl rest2)
         | _ => raise ParseError "\"=>\" is not used in Predicate of \"!\""
       end
-    | pPrimary ((Keyword "!") ::  _) = 
+    | pPrimary ((Keyword "!") ::  _) =
       raise ParseError "failed to parse contents of \"!\""
 
-    | pPrimary ((Keyword "#") :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) = 
+    | pPrimary ((Keyword "#") :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) =
       let
         val (allp, rest) = pPredicate btokens
       in
@@ -924,8 +924,8 @@ struct
       end
     | pPrimary ((Keyword "#") :: (Keyword "(") :: (Var x) :: btokens) =
       let
-        fun bindExprList ((Keyword ",") :: (Var y) :: r) = 
-            let 
+        fun bindExprList ((Keyword ",") :: (Var y) :: r) =
+            let
               val (lst, rr) = bindExprList r
             in
               (((Var y) :: lst), rr)
@@ -940,7 +940,7 @@ struct
         else
           (BE_Exists (((Var x) :: exls), allp), tl rest2)
       end
-    | pPrimary ((Keyword "#") ::  _) = 
+    | pPrimary ((Keyword "#") ::  _) =
       raise ParseError "failed to parse contents of \"#\""
     | pPrimary (btokens as ((Keyword "%")     ::  _)) = pLambdas btokens
     | pPrimary (btokens as ((Keyword "SIGMA") ::  _)) = pSigmas btokens
@@ -991,11 +991,11 @@ struct
                     | lceAux _ = raise ParseError "failed to parse comma-separated expressions"
                   val (es, r2) = lceAux r1
                 in
-                  (e :: es, r2)                  
+                  (e :: es, r2)
                 end
           in
             (case f of
-                "son" => 
+                "son" =>
                   let
                     val (exs, rest) = listingExprs btokens
                   in
@@ -1004,7 +1004,7 @@ struct
                     else
                       raise ParseError "invalid number of \"son()\" parameter"
                   end
-              | "bin" => 
+              | "bin" =>
                 let
                   val (exs, rest) = listingExprs btokens
                 in
@@ -1013,15 +1013,15 @@ struct
                   else
                     raise ParseError "invalid number of \"bin()\" parameter"
                 end
-              | "struct" => 
+              | "struct" =>
                 (case btokens of
                     ((Var x) :: (Keyword ":") :: btks) =>
                       let
-                        fun pStructAux ((Keyword ",") :: (Var y) :: (Keyword ":") :: bt) = 
+                        fun pStructAux ((Keyword ",") :: (Var y) :: (Keyword ":") :: bt) =
                             let
                               val (ee, r1) = (getNextEe 115) bt
                               val (pps, r2) = pStructAux r1
-                            in 
+                            in
                               ((y, ee) :: pps, r2)
                             end
                           | pStructAux ((Keyword ")") :: bt) = ([], bt)
@@ -1034,28 +1034,28 @@ struct
                   | _ => raise ParseError "invalid \"struct\" contents")
               | "rec" =>
                 let
-                  fun pRecAux ((Keyword ",") :: (Var y) :: (Keyword ":") :: bt) = 
+                  fun pRecAux ((Keyword ",") :: (Var y) :: (Keyword ":") :: bt) =
                       let
                         val (ee, r1) = (getNextEe 115) bt
                         val (pps, r2) = pRecAux r1
-                      in 
+                      in
                         ((SOME y, ee) :: pps, r2)
                       end
                     | pRecAux ((Keyword ")") :: bt) = ([], bt)
-                    | pRecAux bt = 
+                    | pRecAux bt =
                       let
                         val (ee, r1) = (getNextEe 115) bt
                         val (pps, r2) = pRecAux r1
                       in
                         ((NONE, ee) :: pps, r2)
                       end
-                in 
+                in
                   (case btokens of
-                      ((Var x) :: (Keyword ":") :: btks) => 
+                      ((Var x) :: (Keyword ":") :: btks) =>
                         let
                           val (e, rest1) = (getNextEe 115) btks
                           val (ps, rest2) = pRecAux rest1
-                        in 
+                        in
                           (BE_Rec (NONE, (SOME x, e) :: ps), rest2)
                         end
                     | btks =>
@@ -1072,7 +1072,7 @@ struct
     | pPrimary _ = raise ParseError "failed to parse a primary expression"
   and
       pSigmas (kw :: (Keyword "(") :: (Var x) :: (Keyword ")") :: btokens) = pSigmas (kw :: (Var x) :: btokens)
-    | pSigmas (kw :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) = 
+    | pSigmas (kw :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) =
       let
         val (p, rest1) = pPredicate btokens
       in
@@ -1093,7 +1093,7 @@ struct
       end
     | pSigmas _ = raise ParseError ""
   and
-    pLambdas (kw :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) = 
+    pLambdas (kw :: (Var x) :: (Keyword ".") :: (Keyword "(") :: btokens) =
       let
         val (p, rest1) = pPredicate btokens
       in
@@ -1107,12 +1107,12 @@ struct
               raise ParseError "missing RIGHT BRACKET"
             else
               (pLambdas2 kw [Var x] p e, tl rest2)
-          end 
+          end
       end
     | pLambdas (kw :: (Keyword "(") :: (Var x) :: btokens) =
       let
-        fun bindExprList ((Keyword ",") :: (Var y) :: r) = 
-            let 
+        fun bindExprList ((Keyword ",") :: (Var y) :: r) =
+            let
               val (lst, rr) = bindExprList r
             in
               (((Var y) :: lst), rr)
@@ -1137,7 +1137,7 @@ struct
       end
     | pLambdas _ = raise ParseError "failed to parse binding"
   and
-    pLambdas2 kw vs p e = 
+    pLambdas2 kw vs p e =
       case kw of
         (Keyword "%")     => BE_Lambda (NONE, vs, p, e)
       | (Keyword "INTER") => BE_Inter  (NONE, vs, p, e)

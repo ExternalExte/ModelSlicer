@@ -6,7 +6,7 @@ struct
         val os = IdentifierDuplication.originalString s
         val (x :: xs) = String.explode os
       in
-        Char.isUpper x andalso (List.all (fn y => Char.isUpper y orelse y = #"_") xs) 
+        Char.isUpper x andalso (List.all (fn y => Char.isUpper y orelse y = #"_") xs)
       end
 
   (* デバッグ用 *)
@@ -23,17 +23,17 @@ struct
     | typeToString (SOME (BT_Enum (s, sl))) = s^"={"^(Utils.concatWith "," sl)^"}"
     | typeToString (SOME BT_Predicate) = "PREDICATE"
 
-  fun typeOf (BE_Leaf        (t, _))       = t 
+  fun typeOf (BE_Leaf        (t, _))       = t
     | typeOf (BE_Node1       (t, _, _))    = t
     | typeOf (BE_Commutative (t, _, _))    = t
-    | typeOf (BE_Fnc         (t, _, _))    = t 
+    | typeOf (BE_Fnc         (t, _, _))    = t
     | typeOf (BE_Img         (t, _, _))    = t
     | typeOf (BE_NodeN       (t, _, _))    = t
     | typeOf (BE_Bool        _)            = SOME BT_Predicate
-    | typeOf (BE_Node2       (t, _, _, _)) = t 
-    | typeOf (BE_ExSet       (t, _))       = t 
-    | typeOf (BE_InSet       (t, _, _))    = t 
-    | typeOf (BE_Seq         (t, _))       = t 
+    | typeOf (BE_Node2       (t, _, _, _)) = t
+    | typeOf (BE_ExSet       (t, _))       = t
+    | typeOf (BE_InSet       (t, _, _))    = t
+    | typeOf (BE_Seq         (t, _))       = t
     | typeOf (BE_ForAll      _)            = SOME BT_Predicate
     | typeOf (BE_Exists      _)            = SOME BT_Predicate
     | typeOf (BE_Lambda      (t, _, _, _)) = t
@@ -49,14 +49,14 @@ struct
       setType t x = setTypeOpt (SOME t) x
   and
       (* 式に型 (オプション型) をセットする *)
-      setTypeOpt t (BE_Leaf        (_, x))           = BE_Leaf        (t, x) 
+      setTypeOpt t (BE_Leaf        (_, x))           = BE_Leaf        (t, x)
     | setTypeOpt t (BE_Node1       (_, x1, x2))      = BE_Node1       (t, x1, x2)
     | setTypeOpt t (BE_Node2       (_, x1, x2, x3))  = BE_Node2       (t, x1, x2, x3)
     | setTypeOpt t (BE_NodeN       (_, x1, x2))      = BE_NodeN       (t, x1, x2)
     | setTypeOpt t (BE_Fnc         (_, x1, x2))      = BE_Fnc         (t, x1, x2)
     | setTypeOpt t (BE_Img         (_, x1, x2))      = BE_Img         (t, x1, x2)
     (* BE_Bool は型情報なし *)
-    | setTypeOpt t (BE_ExSet       (_, x))           = BE_ExSet       (t, x) 
+    | setTypeOpt t (BE_ExSet       (_, x))           = BE_ExSet       (t, x)
     | setTypeOpt t (BE_InSet       (_, x1, x2))      = BE_InSet       (t, x1, x2)
     | setTypeOpt t (BE_Seq         (_, x))           = BE_Seq         (t, x)
     (* BE_ForAll は型情報なし *)
@@ -69,14 +69,14 @@ struct
     | setTypeOpt t (BE_Struct      (_, x))           = BE_Struct      (t, x)
     | setTypeOpt t (BE_Rec         (_, x))           = BE_Rec         (t, x)
     | setTypeOpt t (BE_RcAc        (_, x1, x2))      = BE_RcAc        (t, x1, x2)
-    | setTypeOpt t (BE_Commutative (_, x1, x2))      = BE_Commutative (t, x1, x2)  
+    | setTypeOpt t (BE_Commutative (_, x1, x2))      = BE_Commutative (t, x1, x2)
     | setTypeOpt t x = x
   and
       (* コンポーネント内の型情報を全てクリアする *)
       resetTypeInComponent c = AST.mapExprsInComponent (setTypeOpt NONE) c
   and
     (* 環境 (識別子とその型の組のリスト) を式に反映する *)
-      setEnv env expr = 
+      setEnv env expr =
       let
         fun setEnvAux (BE_Leaf (to, Var x)) =
             let
@@ -107,7 +107,7 @@ struct
       end
     | getEnv _ _ = raise BTypeError ""
   and
-    typeConstraints parameters constraintsOpt clauses = 
+    typeConstraints parameters constraintsOpt clauses =
       (case (parameters, constraintsOpt) of
           ([]   , NONE  ) => ([], clauses)
         | ([]   , SOME _) => raise BTypeError "0 machine parameter with constraints clause"
@@ -119,8 +119,8 @@ struct
             end
           else
             raise BTypeError "scalar parameters without constraints"
-        | (param, SOME (BC_CONSTRAINTS (BP e))) => 
-          let  
+        | (param, SOME (BC_CONSTRAINTS (BP e))) =>
+          let
             val env1 = List.map (fn (Var x) => if isTypeSetByName x then (Var x, SOME (BT_Power (SOME (BT_Deferred x)))) else (Var x, NONE) | _ => raise BTypeError "") param
             val ne = typeExprTree (setEnv env1 e)
             val env2 = getEnv env1 ne
@@ -167,7 +167,7 @@ struct
     | typeInvariant _ _ _ = raise BTypeError ""
   and
     typeInitialisation env NONE clauses = clauses
-    | typeInitialisation env (SOME (BC_INITIALISATION s)) clauses = 
+    | typeInitialisation env (SOME (BC_INITIALISATION s)) clauses =
       let
         val ns = typeSubstitutionTree env s
       in
@@ -176,7 +176,7 @@ struct
     | typeInitialisation _ _ _ = raise BTypeError ""
   and
     typeOperations env NONE clauses = clauses
-    | typeOperations env (SOME (BC_OPERATIONS ops)) clauses = 
+    | typeOperations env (SOME (BC_OPERATIONS ops)) clauses =
       (BC_OPERATIONS (List.map (typeOperation env) ops)) :: (List.filter (fn (BC_OPERATIONS _) => false | _ => true) clauses)
     | typeOperations _ _ _ = raise BTypeError ""
   and
@@ -230,7 +230,7 @@ struct
     | typeValues env (SOME (BC_VALUES l)) clauses = (BC_VALUES (List.map (fn (v, e) => (v, Utils.repeatApply typeExpr (setEnv env e))) l)) :: (List.filter (fn (BC_VALUES _) => false | _ => true) clauses)
     | typeValues _ _ _ = raise BTypeError ""
   and
-      typeComponent (BMch (machinename, parameters, clauses)) = 
+      typeComponent (BMch (machinename, parameters, clauses)) =
       let
         val constraintsOpt    = List.find (fn (BC_CONSTRAINTS _)    => true | _ => false) clauses
         val setsOpt           = List.find (fn (BC_SETS _)           => true | _ => false) clauses
@@ -268,7 +268,7 @@ struct
               NONE                    => []
             | SOME (BC_CCONSTANTS vs) => List.map (fn (Var x) => (Var x, NONE : BType option) | _ => raise BTypeError "") vs
             | _ => raise BTypeError ""
-          ) 
+          )
         val (envProperties, c2) = typeProperties (envConstraints @ envSets @ envAconstants @ envCconstants) propertiesOpt c1
         val c3 = typeSees     envProperties seesOpt     c2
         val c4 = typeIncludes envProperties includesOpt c3
@@ -282,13 +282,13 @@ struct
               NONE                    => []
             | SOME (BC_AVARIABLES vs) => List.map (fn (Var x) => (Var x, NONE : BType option) | _ => raise BTypeError "") vs
             | _ => raise BTypeError ""
-          ) 
+          )
         val envCvariables = (
             case cvariablesOpt of
               NONE                    => []
             | SOME (BC_CVARIABLES vs) => List.map (fn Var x => (Var x, NONE : BType option) | _ => raise BTypeError "") vs
             | _ => raise BTypeError ""
-          ) 
+          )
         val (envInvariant, c10) = typeInvariant (envConstraints @ envProperties @ envAvariables @ envCvariables) invariantOpt c9
         val c11 = typeAssertions envInvariant assertionsOpt c10
         val c12 = typeInitialisation envInvariant initialisationOpt c11
@@ -299,7 +299,7 @@ struct
     | typeComponent _ = raise BTypeError "input is not an abstract machine"
   and
       typeSubstitutionTree env (BS_Block s) = (BS_Block (typeSubstitutionTree env s))
-    | typeSubstitutionTree env (BS_Precondition (BP ps, s)) = 
+    | typeSubstitutionTree env (BS_Precondition (BP ps, s)) =
       let
         fun updateEnv (oldenv, oldp) =
             let
@@ -313,7 +313,7 @@ struct
       in
         BS_Precondition (BP ps1, s1)
       end
-    | typeSubstitutionTree env (BS_Assertion (BP ps, s)) = 
+    | typeSubstitutionTree env (BS_Assertion (BP ps, s)) =
       let
         fun updateEnv (oldenv, oldp) =
             let
@@ -333,10 +333,10 @@ struct
     | typeSubstitutionTree env (BS_Select l) = BS_Select (List.map (fn (SOME p, s) => (SOME (typePredicateTree env p), typeSubstitutionTree env s)
                                                              | (NONE  , s) => (NONE, typeSubstitutionTree env s)) l)
     | typeSubstitutionTree env (BS_Case (ex, l)) = BS_Case (typeExprTree (setEnv env ex), List.map (fn (es, s) => (List.map (fn x => typeExprTree (setEnv env x)) es, typeSubstitutionTree env s)) l)
-    | typeSubstitutionTree env (BS_Any (vs, BP ps, s)) = 
+    | typeSubstitutionTree env (BS_Any (vs, BP ps, s)) =
       let
         val env1 = List.map (fn x => (x, NONE)) vs
-        fun updateEnv (oldenv, oldp) = 
+        fun updateEnv (oldenv, oldp) =
             let
               val np = typeExprTree (setEnv oldenv oldp)
               val nenv = getEnv oldenv np
@@ -348,7 +348,7 @@ struct
       in
         BS_Any (vs, BP p1, s1)
       end
-    | typeSubstitutionTree env (BS_Let (l, s)) = 
+    | typeSubstitutionTree env (BS_Let (l, s)) =
       let
         fun updateEnv (oldenv, oldl) =
             let
@@ -361,7 +361,7 @@ struct
                   in
                     case eOpt of
                       NONE          => addEnv en rest
-                    | SOME (vv, tt) => 
+                    | SOME (vv, tt) =>
                       let
                         val nt = typeUnification t tt
                       in
@@ -373,7 +373,7 @@ struct
                           in
                             addEnv nen rest
                           end
-                      end 
+                      end
                   end
               val nenv = addEnv oldenv lenv
             in
@@ -383,16 +383,16 @@ struct
         val s1 = typeSubstitutionTree env1 s
       in
         BS_Let (l1, s1)
-      end    
-    
+      end
+
     | typeSubstitutionTree env (BS_BecomesElt (el, re)) =
       let
         fun makeLhsTree [] = raise BTypeError ""
           | makeLhsTree [e] = e
           | makeLhsTree (e1 :: e2 :: es) = makeLhsTree ((BE_Node2 (NONE, Keyword ",", e1, e2)) :: es)
-          
+
         val lhsTree = makeLhsTree el
-        
+
         fun subsTreeAux (xold, yold) =
             let
               val nx = typeExprTree (setEnv env xold)
@@ -414,12 +414,12 @@ struct
 
         fun listLhs (BE_Node2 (_, Keyword ",", e1, e2)) = (listLhs e1) @ [e2]
           | listLhs e = [e]
-        
+
       in
         BS_BecomesElt (listLhs newLhsTree, nre)
       end
     | typeSubstitutionTree env (BS_BecomesSuchThat (es, p)) = BS_BecomesSuchThat (List.map (fn e => typeExprTree (setEnv env e)) es, typePredicateTree env p)
-    | typeSubstitutionTree env (BS_BecomesEqual (x, y)) = 
+    | typeSubstitutionTree env (BS_BecomesEqual (x, y)) =
       let
         fun subsTreeAux (xold, yold) =
             let
@@ -456,7 +456,7 @@ struct
     | typeUnification (SOME x)                  NONE                      = SOME x
     | typeUnification (SOME (BT_Power x))       (SOME (BT_Power y))       = SOME (BT_Power (typeUnification x y))
     | typeUnification (SOME (BT_Pair (x1, x2))) (SOME (BT_Pair (y1, y2))) = SOME (BT_Pair (typeUnification x1 y1, typeUnification x2 y2))
-    | typeUnification (SOME (BT_Struct l1))     (SOME (BT_Struct l2))     = 
+    | typeUnification (SOME (BT_Struct l1))     (SOME (BT_Struct l2))     =
       let
         val l12 = ListPair.zip (l1, l2)
         val nl = List.map (fn ((t1, s1), (t2, s2)) => if s1 = s2 then (valOf (typeUnification (SOME t1) (SOME t2)), s1) else raise BTypeError "") l12
@@ -471,7 +471,7 @@ struct
       in
         (case rct of
             NONE                  => ex
-          | SOME (BT_Struct flst) => 
+          | SOME (BT_Struct flst) =>
             let
               val t = #1 (valOf (List.find (fn (_, y) => y = x) flst))
             in
@@ -499,22 +499,22 @@ struct
       in
         BE_Node1 (t, Keyword "-", setTypeOpt t y)
       end
-    
+
     | typeExpr (BE_Node2 (_, Keyword "**", x, y)) = (* a**b *)
       BE_Node2 (SOME BT_Integer, Keyword "**", setType BT_Integer x, setType BT_Integer y)
-  
+
     | typeExpr (BE_Node2 (_, Keyword "/", x, y)) = (* a/b *)
       BE_Node2 (SOME BT_Integer, Keyword "/", setType BT_Integer x, setType BT_Integer y)
     | typeExpr (BE_Node2 (_, Keyword "mod", x, y)) = (* a mod b *)
       BE_Node2 (SOME BT_Integer, Keyword "mod", setType BT_Integer x, setType BT_Integer y)
-    
+
     | typeExpr (ex as BE_Node2 (zto, Keyword "*", x, y)) = (* a * b *) (* 集合・スカラー両方に対応 *)
       let
         val xto = typeOf x
         val yto = typeOf y
-        val (nxto, nyto, nzto) = 
+        val (nxto, nyto, nzto) =
           ((
-            case (xto, yto, zto) of 
+            case (xto, yto, zto) of
               (NONE              , NONE              , NONE                                       ) => (NONE, NONE, NONE)
             | (SOME (BT_Power xt), SOME (BT_Power yt), SOME (BT_Power (SOME (BT_Pair (zt1, zt2))))) =>
               let
@@ -579,8 +579,8 @@ struct
       in
         BE_Node2 (nzto, Keyword "*", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    
-    | typeExpr (BE_Node2 (_, Keyword "..", x, y)) = 
+
+    | typeExpr (BE_Node2 (_, Keyword "..", x, y)) =
       (BE_Node2 (SOME (BT_Power (SOME BT_Integer)), Keyword "..", setType BT_Integer x, setType BT_Integer y))
     | typeExpr (ex as BE_Node2 (_, Keyword "/:", x, y)) =
       let
@@ -608,16 +608,16 @@ struct
       in
         BE_Node2 (SOME BT_Predicate, Keyword ":", setTypeOpt nxto x, setTypeOpt (SOME (BT_Power nxto)) y)
       end
-    
-    | typeExpr (BE_Node2 (_,  Keyword "or",  x, y)) = 
+
+    | typeExpr (BE_Node2 (_,  Keyword "or",  x, y)) =
         BE_Node2 (SOME BT_Predicate, Keyword "or",  setType BT_Predicate x, setType BT_Predicate y)
-    | typeExpr (BE_Node2 (_,  Keyword "&",   x, y)) = 
+    | typeExpr (BE_Node2 (_,  Keyword "&",   x, y)) =
         BE_Node2 (SOME BT_Predicate, Keyword "&",   setType BT_Predicate x, setType BT_Predicate y)
-    | typeExpr (BE_Node2 (_,  Keyword "=>",  x, y)) = 
+    | typeExpr (BE_Node2 (_,  Keyword "=>",  x, y)) =
         BE_Node2 (SOME BT_Predicate, Keyword "=>",  setType BT_Predicate x, setType BT_Predicate y)
-    | typeExpr (BE_Node2 (_,  Keyword "<=>", x, y)) = 
+    | typeExpr (BE_Node2 (_,  Keyword "<=>", x, y)) =
         BE_Node2 (SOME BT_Predicate, Keyword "<=>", setType BT_Predicate x, setType BT_Predicate y)
-    
+
     | typeExpr (BE_Node2 (to, Keyword "+",   x, y)) = ((kwXxx (x, y, to, "+"))   handle BTypeError _ => raise BTypeError "+")
     | typeExpr (BE_Node2 (to, Keyword "-",   x, y)) = ((kwXxx (x, y, to, "-"))   handle BTypeError _ => raise BTypeError "-")
     | typeExpr (BE_Node2 (to, Keyword "<+",  x, y)) = ((kwXxx (x, y, to, "<+"))  handle BTypeError _ => raise BTypeError "<+")
@@ -629,14 +629,14 @@ struct
       (case typeExpr (BE_Node2 (zto, Keyword "|->", x, y)) of
         BE_Node2 (nzto, _, nx, ny) => BE_Node2 (nzto, Keyword ",", nx, ny)
       | _ => raise BTypeError "")
-        
+
     | typeExpr (BE_Node2 (zto, Keyword "|->", x, y)) =
       let
         val xto = typeOf x
         val yto = typeOf y
-        val (nxto, nyto) = 
+        val (nxto, nyto) =
           ((case zto of
-              SOME (BT_Pair (zto1, zto2)) => 
+              SOME (BT_Pair (zto1, zto2)) =>
                 (typeUnification xto zto1, typeUnification yto zto2)
             | NONE => (xto, yto)
             | _ => raise BTypeError "") handle BTypeError _ => raise BTypeError "|->")
@@ -666,23 +666,23 @@ struct
 
     | typeExpr (BE_Node2 (zto, Keyword "|>>",  x, y)) = ((typeRanOperations (zto, x, y, "|>>")) handle BTypeError _ => raise BTypeError "|>>")
     | typeExpr (BE_Node2 (zto, Keyword "|>",   x, y)) = ((typeRanOperations (zto, x, y, "|>"))  handle BTypeError _ => raise BTypeError "|>")
-    
+
     | typeExpr (BE_Node2 (zto, Keyword "<<|",  x, y)) = ((typeDomOperations (zto, x, y, "<<|")) handle BTypeError _ => raise BTypeError "<<|")
     | typeExpr (BE_Node2 (zto, Keyword "<|",   x, y)) = ((typeDomOperations (zto, x, y, "<|"))  handle BTypeError _ => raise BTypeError "<|")
     | typeExpr (BE_Node2 (zto, Keyword "\\|/", x, y)) = ((typeRseq (zto, x, y, "\\|/")) handle BTypeError _ => raise BTypeError "\\|/")
     | typeExpr (BE_Node2 (zto, Keyword "/|\\", x, y)) = ((typeRseq (zto, x, y, "/|\\")) handle BTypeError _ => raise BTypeError "/|\\")
-    | typeExpr (BE_Node2 (zto, Keyword "<-",   x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "<-",   x, y)) =
       let
         val xzto = ((typeUnification (typeOf x) zto) handle BTypeError _ => raise BTypeError "<-")
         val yto = typeOf y
         val eto = (
-            case xzto of 
+            case xzto of
               SOME (BT_Power (SOME (BT_Pair (_, eto1)))) => ((typeUnification eto1 yto) handle BTypeError _ => raise BTypeError "<-")
             | _ => yto
           )
         val nxto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, eto))))
         val nyto = eto
-        val nzto = nxto 
+        val nzto = nxto
       in
         BE_Node2 (nzto, Keyword "<-", setTypeOpt nxto x, setTypeOpt nyto y)
       end
@@ -691,21 +691,21 @@ struct
         val yzto = ((typeUnification (typeOf y) zto) handle BTypeError _ => raise BTypeError "->")
         val xto = typeOf x
         val eto = (
-            case yzto of 
+            case yzto of
               SOME (BT_Power (SOME (BT_Pair (_, eto1)))) => ((typeUnification eto1 xto) handle BTypeError _ => raise BTypeError "->")
             | _ => xto
           )
         val nxto = eto
         val nyto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, eto))))
-        val nzto = nyto 
+        val nzto = nyto
       in
         BE_Node2 (nzto, Keyword "->", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    | typeExpr (BE_Node2 (zto, Keyword ";", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword ";", x, y)) =
       let
         val xto = typeOf x
         val yto = typeOf y
-        val (nato, nbto, ncto) = 
+        val (nato, nbto, ncto) =
           ((
             case (xto, yto, zto) of
               (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), SOME (BT_Power (SOME (BT_Pair (bto2, cto1)))), SOME (BT_Power (SOME (BT_Pair (ato2, cto2))))) => (typeUnification ato1 ato2, typeUnification bto1 bto2, typeUnification cto1 cto2)
@@ -729,44 +729,44 @@ struct
         val yto = typeOf y
         val (nato, nbto, ncto) = ((
             case (xto, yto, zto) of
-              (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), 
-                SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))), 
+              (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))),
+                SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))),
                 SOME (BT_Power (SOME (BT_Pair (ato3, SOME (BT_Pair (bto3, cto3)))))))
-              => 
+              =>
                 (typeUnification ato1 ato3, typeUnification bto1 (typeUnification bto2 bto3), typeUnification cto2 cto3)
-            | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), 
-              SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))), 
+            | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))),
+              SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))),
               SOME (BT_Power (SOME (BT_Pair (ato3, _)))))
-            => 
+            =>
               (typeUnification ato1 ato3, typeUnification bto1 bto2, cto2)
-            |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), 
-              SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))), 
+            |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))),
+              SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))),
               _)
-            => 
+            =>
               (ato1, typeUnification bto1 bto2, cto2)
-            |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), 
-              _, 
+            |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))),
+              _,
               SOME (BT_Power (SOME (BT_Pair (ato3, SOME (BT_Pair (bto3, cto3)))))))
-            => 
+            =>
               (typeUnification ato1 ato3, typeUnification bto1 bto3, cto3)
-            |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), 
-              _, 
+            |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))),
+              _,
               SOME (BT_Power (SOME (BT_Pair (ato3, _)))))
-            => 
+            =>
               (typeUnification ato1 ato3, bto1, NONE)
-            |(_, 
-              SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))), 
+            |(_,
+              SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))),
               SOME (BT_Power (SOME (BT_Pair (ato3, SOME (BT_Pair (bto3, cto3)))))))
-            => 
+            =>
               (ato3, typeUnification bto2 bto3, typeUnification cto2 cto3)
             |(SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), _, _)
-            => 
+            =>
               (ato1, bto1, NONE)
             |(_, SOME (BT_Power (SOME (BT_Pair (bto2, cto2)))), _)
-            => 
+            =>
               (NONE, bto2, cto2)
             |(_, _, SOME (BT_Power (SOME (BT_Pair (ato3, SOME (BT_Pair (bto3, cto3)))))))
-            => 
+            =>
               (ato3, bto3, cto3)
             | _ => (NONE, NONE, NONE)
           ) handle BTypeError _ => raise BTypeError "><")
@@ -776,14 +776,14 @@ struct
       in
         BE_Node2 (nzto, Keyword "><", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-     
+
     | typeExpr (BE_Fnc (yto, f, x)) =
       let
         val fto = typeOf f
         val xto = typeOf x
         val (nxto, nyto) = ((
-            case fto of 
-              SOME (BT_Power (SOME (BT_Pair (ato, bto)))) => 
+            case fto of
+              SOME (BT_Power (SOME (BT_Pair (ato, bto)))) =>
                 (typeUnification ato xto, typeUnification bto yto)
             | _ => (xto, yto)
           ) handle BTypeError _ => raise BTypeError "ff(xx)")
@@ -796,7 +796,7 @@ struct
         val fto = typeOf f
         val xto = typeOf x
         val (nato, nbto) = ((
-            case (fto, xto, yto) of 
+            case (fto, xto, yto) of
               (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), SOME (BT_Power ato2), SOME (BT_Power bto2)) => (typeUnification ato1 ato2, typeUnification bto1 bto2)
             | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), SOME (BT_Power ato2), NONE                ) => (typeUnification ato1 ato2, bto1                     )
             | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), NONE                , SOME (BT_Power bto2)) => (ato1                     , typeUnification bto1 bto2)
@@ -812,26 +812,26 @@ struct
       in
         BE_Img (nyto, setTypeOpt nfto f, setTypeOpt nxto x)
       end
-            
+
     | typeExpr (BE_Node1 (_, Keyword "bool", y)) =
       BE_Node1 (SOME BT_Bool, Keyword "bool", setTypeOpt (SOME BT_Predicate) y)
-    | typeExpr (BE_Node1 (_, Keyword "not", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "not", x)) =
       BE_Node1 (SOME BT_Predicate, Keyword "not", setType BT_Predicate x)
-    | typeExpr (BE_Node1 (_, Keyword "pred", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "pred", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "pred", setType BT_Integer x)
-    | typeExpr (BE_Node1 (_, Keyword "succ", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "succ", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "succ", setType BT_Integer x)
-    | typeExpr (BE_Node1 (_, Keyword "floor", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "floor", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "floor", setType BT_Real x)
-    | typeExpr (BE_Node1 (_, Keyword "ceiling", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "ceiling", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "ceiling", setType BT_Real x)
-    | typeExpr (BE_Node1 (_, Keyword "real", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "real", x)) =
       BE_Node1 (SOME BT_Real, Keyword "real", setType BT_Integer x)
-    | typeExpr (BE_Node1 (_, Keyword "card", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "card", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "card", setTypeOpt ((typeUnification (typeOf x) (SOME (BT_Power NONE))) handle BTypeError _ => raise BTypeError "card") x)
-    | typeExpr (BE_Node1 (_, Keyword "size", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "size", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "size", setTypeOpt ((typeUnification (typeOf x) (SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, NONE)))))) handle BTypeError _ => raise BTypeError "size") x)
-    | typeExpr (BE_Node1 (_, Keyword "sizet", x)) = 
+    | typeExpr (BE_Node1 (_, Keyword "sizet", x)) =
       BE_Node1 (SOME BT_Integer, Keyword "sizet", setTypeOpt ((typeUnification (typeOf x) (SOME (BT_Power (SOME (BT_Pair (SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer)))), NONE)))))) handle BTypeError _ => raise BTypeError "sizet") x)
     | typeExpr (BE_Node1 (yto, Keyword "max", x))  = ((typeMinmax (yto, "max", x)) handle BTypeError _ => raise BTypeError "max")
     | typeExpr (BE_Node1 (yto, Keyword "min", x))  = ((typeMinmax (yto, "min", x)) handle BTypeError _ => raise BTypeError "min")
@@ -859,7 +859,7 @@ struct
     | typeExpr (BE_Node1 (yto, Keyword "last" , x)) = ((typeFlseq (yto, "last" , x)) handle BTypeError _ => raise BTypeError "last")
     | typeExpr (BE_Node1 (yto, Keyword "union", x)) = ((typeUiset (yto, "union", x)) handle BTypeError _ => raise BTypeError "union")
     | typeExpr (BE_Node1 (yto, Keyword "inter", x)) = ((typeUiset (yto, "inter", x)) handle BTypeError _ => raise BTypeError "inter")
-    | typeExpr (BE_Node1 (dto, Keyword "dom", f)) = 
+    | typeExpr (BE_Node1 (dto, Keyword "dom", f)) =
       let
         val fto = typeOf f
         val (nato, nbto) = (
@@ -875,7 +875,7 @@ struct
       in
         BE_Node1 (ndto, Keyword "dom", setTypeOpt nfto f)
       end
-    | typeExpr (BE_Node1 (rto, Keyword "ran", f)) = 
+    | typeExpr (BE_Node1 (rto, Keyword "ran", f)) =
       let
         val fto = typeOf f
         val (nato, nbto) = (
@@ -893,13 +893,13 @@ struct
       end
     | typeExpr (BE_Node1 (fto, Keyword "closure",  g)) = ((typeClosure (fto, "closure",  g)) handle BTypeError _ => raise BTypeError "closure")
     | typeExpr (BE_Node1 (fto, Keyword "closure1", g)) = ((typeClosure (fto, "closure1", g)) handle BTypeError _ => raise BTypeError "closure1")
-    
+
     | typeExpr (BE_Node1 (yto, Keyword "seq",      x)) = ((typeSeqset (yto, "seq",   x)) handle BTypeError _ => raise BTypeError "seq")
     | typeExpr (BE_Node1 (yto, Keyword "seq1",     x)) = ((typeSeqset (yto, "seq1",  x)) handle BTypeError _ => raise BTypeError "seq1")
     | typeExpr (BE_Node1 (yto, Keyword "iseq",     x)) = ((typeSeqset (yto, "iseq",  x)) handle BTypeError _ => raise BTypeError "iseq")
     | typeExpr (BE_Node1 (yto, Keyword "iseq1",    x)) = ((typeSeqset (yto, "iseq1", x)) handle BTypeError _ => raise BTypeError "iseq1")
     | typeExpr (BE_Node1 (yto, Keyword "perm",     x)) = ((typeSeqset (yto, "perm",  x)) handle BTypeError _ => raise BTypeError "perm")
-    
+
     | typeExpr (BE_Node1 (yto, Keyword "rev",      x)) = ((typeSeqConvert (yto, "rev",   x)) handle BTypeError _ => raise BTypeError "rev")
     | typeExpr (BE_Node1 (yto, Keyword "front",    x)) = ((typeSeqConvert (yto, "front", x)) handle BTypeError _ => raise BTypeError "front")
     | typeExpr (BE_Node1 (yto, Keyword "tail",     x)) = ((typeSeqConvert (yto, "tail",  x)) handle BTypeError _ => raise BTypeError "tail")
@@ -907,7 +907,7 @@ struct
     | typeExpr (BE_Node1 (yto, Keyword "btree",    x)) = ((typeTrees (yto, "btree", x)) handle BTypeError _ => raise BTypeError "btree")
     | typeExpr (BE_Node1 (yto, Keyword "tree",     x)) = ((typeTrees (yto, "tree",  x)) handle BTypeError _ => raise BTypeError "tree")
 
-    | typeExpr (BE_Node1 (yto, Keyword "fnc",      x)) = 
+    | typeExpr (BE_Node1 (yto, Keyword "fnc",      x)) =
       let
         val xto = typeOf x
         val (nato, nbto) = ((
@@ -917,14 +917,14 @@ struct
             | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), _                                                            ) => (ato1                     , bto1)
             | (_                                            , SOME (BT_Power (SOME (BT_Pair (ato2, SOME (BT_Power bto2)))))) => (ato2                     , bto2)
             | (_                                            , SOME (BT_Power (SOME (BT_Pair (ato2, NONE                ))))) => (ato2                     , NONE)
-            | _                                                                                                              => (NONE                     , NONE) 
+            | _                                                                                                              => (NONE                     , NONE)
           ) handle BTypeError _ => raise BTypeError "fnc")
         val nxto = SOME (BT_Power (SOME (BT_Pair (nato, nbto))))
         val nyto = SOME (BT_Power (SOME (BT_Pair (nato, SOME (BT_Power nbto)))))
       in
         BE_Node1 (nyto, Keyword "fnc", setTypeOpt nxto x)
       end
-    | typeExpr (BE_Node1 (yto, Keyword "rel", x)) = 
+    | typeExpr (BE_Node1 (yto, Keyword "rel", x)) =
       let
         val xto = typeOf x
         val (nato, nbto) = ((
@@ -934,14 +934,14 @@ struct
             | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), _                                                            ) => (ato1                     , bto1)
             | (_                                            , SOME (BT_Power (SOME (BT_Pair (ato2, SOME (BT_Power bto2)))))) => (ato2                     , bto2)
             | (_                                            , SOME (BT_Power (SOME (BT_Pair (ato2, NONE                ))))) => (ato2                     , NONE)
-            | _                                                                                                              => (NONE                     , NONE) 
+            | _                                                                                                              => (NONE                     , NONE)
           ) handle BTypeError _ => raise BTypeError "rel")
         val nyto = SOME (BT_Power (SOME (BT_Pair (nato, nbto))))
         val nxto = SOME (BT_Power (SOME (BT_Pair (nato, SOME (BT_Power nbto)))))
       in
         BE_Node1 (nyto, Keyword "rel", setTypeOpt nxto x)
       end
-    | typeExpr (BE_Node1 (yto, Keyword "conc", x)) = 
+    | typeExpr (BE_Node1 (yto, Keyword "conc", x)) =
       let
         val xto = typeOf x
         val neto = (
@@ -949,7 +949,7 @@ struct
               (SOME (BT_Power (SOME (BT_Pair (_, SOME (BT_Power (SOME (BT_Pair (_, eto1)))))))), SOME (BT_Power (SOME (BT_Pair (_, eto2))))) => ((typeUnification eto1 eto2) handle BTypeError _ => raise BTypeError "conc")
             | (SOME (BT_Power (SOME (BT_Pair (_, SOME (BT_Power (SOME (BT_Pair (_, eto1)))))))), _                                         ) => eto1
             | (_                                                                               , SOME (BT_Power (SOME (BT_Pair (_, eto2))))) => eto2
-            | _                                                                                                                              => NONE 
+            | _                                                                                                                              => NONE
           )
         val nxto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, neto))))))))
         val nyto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, neto))))
@@ -964,7 +964,7 @@ struct
     | typeExpr (BE_Node1 (yto, Keyword "right",  x)) = ((typeTree2tree (yto, "right",  x)) handle BTypeError _ => raise BTypeError "right")
     | typeExpr (BE_Node1 (yto, Keyword "mirror", x)) = ((typeTree2tree (yto, "mirror", x)) handle BTypeError _ => raise BTypeError "mirror")
 
-    | typeExpr (BE_Node1 (yto, Keyword "top", x)) =    
+    | typeExpr (BE_Node1 (yto, Keyword "top", x)) =
       let
         val xto = typeOf x
         val nyto = (
@@ -1036,15 +1036,15 @@ struct
       in
         BE_Node2 (nzto, Keyword "const", setTypeOpt xto x, setTypeOpt yto y)
       end
-    | typeExpr (BE_Node2 (zto, Keyword "father", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "father", x, y)) =
       let
         val nxto = SOME (BT_Power (SOME (BT_Pair (SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer)))), NONE))))
         val nyto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer))))
-        val nzto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer)))) 
+        val nzto = SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer))))
       in
         BE_Node2 (nzto, Keyword "father", setTypeOpt nyto y, setTypeOpt nxto x)
       end
-    | typeExpr (BE_Node2 (zto, Keyword "iterate", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "iterate", x, y)) =
       let
         val xto = typeOf x
         val nato = ((
@@ -1060,7 +1060,7 @@ struct
       in
         BE_Node2 (nzto, Keyword "iterate", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    | typeExpr (BE_Node2 (zto, Keyword "prj1", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "prj1", x, y)) =
       let
         val xto = typeOf x
         val yto = typeOf y
@@ -1082,7 +1082,7 @@ struct
       in
         BE_Node2 (nzto, Keyword "prj1", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    | typeExpr (BE_Node2 (zto, Keyword "prj2", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "prj2", x, y)) =
       let
         val xto = typeOf x
         val yto = typeOf y
@@ -1104,7 +1104,7 @@ struct
       in
         BE_Node2 (nzto, Keyword "prj2", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    | typeExpr (BE_Node2 (zto, Keyword "rank", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "rank", x, y)) =
       let
         val xto = typeOf x
         val xto1 = SOME (BT_Power (SOME (BT_Pair (SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer)))), NONE))))
@@ -1114,7 +1114,7 @@ struct
       in
         BE_Node2 (nzto, Keyword "rank", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    | typeExpr (BE_Node2 (zto, Keyword "subtree", x, y)) = 
+    | typeExpr (BE_Node2 (zto, Keyword "subtree", x, y)) =
       let
         val xto = typeOf x
         val nato = (
@@ -1130,7 +1130,7 @@ struct
       in
         BE_Node2 (nzto, Keyword "subtree", setTypeOpt nxto x, setTypeOpt nyto y)
       end
-    | typeExpr (BE_NodeN (yto, Keyword "bin", [x])) = 
+    | typeExpr (BE_NodeN (yto, Keyword "bin", [x])) =
       let
         val xto = typeOf x
         val nxto = (
@@ -1142,8 +1142,8 @@ struct
       in
         BE_NodeN (nyto, Keyword "bin", [setTypeOpt nxto x])
       end
-    
- 
+
+
     | typeExpr (BE_NodeN (yto, Keyword "bin", [l, x, r])) =
       let
         val xto = typeOf x
@@ -1167,7 +1167,7 @@ struct
         BE_NodeN (nyto, Keyword "bin", [setTypeOpt nlto l, setTypeOpt nxto x, setTypeOpt nrto r])
       end
     | typeExpr (BE_NodeN (_, Keyword "bin", _)) = raise BTypeError ""
-    | typeExpr (BE_NodeN (sto, Keyword "son", [x, y, z])) = 
+    | typeExpr (BE_NodeN (sto, Keyword "son", [x, y, z])) =
       let
         val xto = typeOf x
         val nxto = ((typeUnification xto (SOME (BT_Power (SOME (BT_Pair (SOME (BT_Power (SOME (BT_Pair (SOME BT_Integer, SOME BT_Integer)))), NONE)))))) handle BTypeError _ => raise BTypeError "son")
@@ -1180,12 +1180,12 @@ struct
     | typeExpr (BE_NodeN (_, Keyword "son", _)) = raise BTypeError ""
 
     (* ラベル付きの要素の型からレコード全体の型への推論 *)
-    | typeExpr (x as (BE_Rec (NONE, (l as ((SOME _, _) :: rest))))) = 
+    | typeExpr (x as (BE_Rec (NONE, (l as ((SOME _, _) :: rest))))) =
       let
         val lo = List.map (fn (SOME s, e) => (typeOf e, s) | _ => raise BTypeError "") l
       in
         if List.exists (fn (NONE, _) => true | _ => false) lo then
-          x          
+          x
         else
           let
             val nl = List.map (fn (SOME t, s) => (t, s) | _ => raise BTypeError "") lo
@@ -1194,7 +1194,7 @@ struct
           end
       end
     (* レコード全体の型と要素の型の相互への推論 *)
-    | typeExpr (x as (BE_Rec (SOME (BT_Struct l1), l2))) = 
+    | typeExpr (x as (BE_Rec (SOME (BT_Struct l1), l2))) =
       let
         val tl1 = List.map (fn (t, s) => (SOME t, s)) l1
         val tl2 = List.map (fn (_, e) => (typeOf e, e)) l2
@@ -1204,7 +1204,7 @@ struct
       in
         BE_Rec (SOME (BT_Struct nl1), nl2)
       end
-    
+
     (* BE_Rec of BType option * (string option * BExpr) list *)
     (* BT_Struct of (BType * string) list *)
     | typeExpr (x as (BE_Rec _)) = x
@@ -1228,7 +1228,7 @@ struct
       in
         BE_Commutative (nto, Keyword tk, List.map (setTypeOpt nto) es)
       end
-      
+
     | typeExpr (BE_InSet (sto, vlst, BP ps)) =
       let
         val oenv = List.map (fn v => (v, NONE)) vlst
@@ -1285,7 +1285,7 @@ struct
       in
         BE_Lambda (nlto, vlst, BP ps, setTypeOpt nranto ne)
       end
-    | typeExpr (BE_Sigma (to, x, BP ps, e)) = 
+    | typeExpr (BE_Sigma (to, x, BP ps, e)) =
       let
         val eto = typeOf e
         val nenv = getEnv [(x, NONE)] ps
@@ -1295,7 +1295,7 @@ struct
       in
         BE_Sigma (nto, x, BP nps, setTypeOpt nto ne)
       end
-    | typeExpr (BE_Pi (to, x, BP ps, e)) = 
+    | typeExpr (BE_Pi (to, x, BP ps, e)) =
       let
         val eto = typeOf e
         val nenv = getEnv [(x, NONE)] ps
@@ -1308,7 +1308,7 @@ struct
 
     | typeExpr (BE_Inter (to, vlst, BP ps, e)) = ((typeQuantified "INTER" to vlst ps e) handle BTypeError _ => raise BTypeError "Inter")
     | typeExpr (BE_Union (to, vlst, BP ps, e)) = ((typeQuantified "UNION" to vlst ps e) handle BTypeError _ => raise BTypeError "Union")
-    
+
     | typeExpr x = x (* 型推論できないものはスルー *)
   and
     typeQuantified kind to vlst ps e =
@@ -1375,7 +1375,7 @@ struct
       end
   and
     typeSeqConvert (yto, s, x) =
-      let 
+      let
         val xto = typeOf x
         val neto = (
             case (xto, yto) of
@@ -1407,7 +1407,7 @@ struct
         BE_Node1 (nyto, Keyword s, setTypeOpt nxto x)
       end
   and
-    typeClosure (fto, s, g) = 
+    typeClosure (fto, s, g) =
       let
         val gto = typeOf g
         val nxto = (
@@ -1440,7 +1440,7 @@ struct
         BE_Node1 (nyto, Keyword s, setTypeOpt nxto x)
       end
   and
-    typeFlseq (yto, s, x) = 
+    typeFlseq (yto, s, x) =
       let
         val xto = typeOf x
         val nyto = (
@@ -1470,7 +1470,7 @@ struct
         BE_Node1 (nyto, Keyword s, setTypeOpt nxto x)
       end
   and
-    typeMinmax (yto, s, x) = 
+    typeMinmax (yto, s, x) =
       let
         val xto = typeOf x
         val nyto = (
@@ -1499,12 +1499,12 @@ struct
       let
         val xto = typeOf x
         val yto = typeOf y
-        val (nato, nbto) = 
+        val (nato, nbto) =
           (case (xto, yto, zto) of
               (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), SOME (BT_Power bto2), SOME (BT_Power (SOME (BT_Pair (ato3, bto3))))) =>
               ((typeUnification ato1 ato3, typeUnification bto1 (typeUnification bto2 bto3)))
 
-            | (_,                                             SOME (BT_Power bto2), SOME (BT_Power (SOME (BT_Pair (ato3, bto3))))) => 
+            | (_,                                             SOME (BT_Power bto2), SOME (BT_Power (SOME (BT_Pair (ato3, bto3))))) =>
               ((ato3, typeUnification bto2 bto3))
 
             | (SOME (BT_Power (SOME (BT_Pair (ato1, bto1)))), NONE                , SOME (BT_Power (SOME (BT_Pair (ato3, bto3))))) =>
@@ -1538,7 +1538,7 @@ struct
       let
         val xto = typeOf x
         val yto = typeOf y
-        val (nato, nbto) = 
+        val (nato, nbto) =
           (case (xto, yto, zto) of
               (SOME (BT_Power ato1), SOME (BT_Power (SOME (BT_Pair (ato2, bto2)))), SOME (BT_Power (SOME (BT_Pair (ato3, bto3))))) => (typeUnification ato1 (typeUnification ato2 ato3), typeUnification bto2 bto3)
             | (SOME (BT_Power ato1), _                                            , SOME (BT_Power (SOME (BT_Pair (ato3, bto3))))) => (typeUnification ato1 ato3                       , bto3                     )
@@ -1557,11 +1557,11 @@ struct
         BE_Node2 (nzto, Keyword s, setTypeOpt nxto x, setTypeOpt nyto y)
       end
   and
-    typeRelationsets (zto, x, y, s) = 
+    typeRelationsets (zto, x, y, s) =
       let
         val xto = typeOf x
         val yto = typeOf y
-        val (nato, nbto) = 
+        val (nato, nbto) =
           (case (xto, yto, zto) of
               (SOME (BT_Power ato1), SOME (BT_Power bto1), SOME (BT_Power (SOME (BT_Power (SOME (BT_Pair (ato2, bto2))))))) => (typeUnification ato1 ato2, typeUnification bto1 bto2)
             | (NONE                , SOME (BT_Power bto1), SOME (BT_Power (SOME (BT_Power (SOME (BT_Pair (ato2, bto2))))))) => (ato2                     , typeUnification bto1 bto2)
@@ -1605,7 +1605,7 @@ struct
               val resto = typeUnification ato bto
             in
               (setTypeOpt resto a, setTypeOpt resto b)
-            end 
+            end
         val (nx, ny) = sameType2 (x, y)
       in
         BE_Node2 (SOME BT_Predicate, Keyword s, nx, ny)
@@ -1669,11 +1669,11 @@ struct
         else
           raise BTypeError "type inference is not completed."
       end
-    | presentTypeInfoInClause _ _ _ (BC_OPERATIONS oprs) = 
+    | presentTypeInfoInClause _ _ _ (BC_OPERATIONS oprs) =
       let
         (* PREにおける入力パラメータの型付け *)
         fun presentTypeInfoInPrecondition (BOp (oprName, outputParams, [], s)) = BOp (oprName, outputParams, [], s)
-          | presentTypeInfoInPrecondition (BOp (oprName, outputParams, inputParams, BS_Precondition (BP e, s))) = 
+          | presentTypeInfoInPrecondition (BOp (oprName, outputParams, inputParams, BS_Precondition (BP e, s))) =
             let
               val emptyEnv = List.map (fn v => (v, NONE)) inputParams
               val env = getEnv emptyEnv e

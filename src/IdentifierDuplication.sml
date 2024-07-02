@@ -12,7 +12,7 @@ struct
                                              | SOME (_, numberHere, _) => (v1, numberHere, numberCount))
                  branchTable
 
-  fun mergeTable originalTable localVars = 
+  fun mergeTable originalTable localVars =
       let
         val newLocalVars = List.map (fn (Var str) => (case (List.find (fn (x, _, _) => x = Var str) originalTable) of
                                                        NONE            => Var (str ^ "_" ^ (Utils.intToFixedString digit 1))
@@ -36,7 +36,7 @@ struct
           (table, BE_Leaf (to, Var (str ^ "_" ^ (Utils.intToFixedString digit number))))
       end
     | renameIdsInExpr table (BE_Leaf x) = (table, BE_Leaf x)
-    | renameIdsInExpr table (BE_Node1 (to, opName, e)) = 
+    | renameIdsInExpr table (BE_Node1 (to, opName, e)) =
       let
         val (subExprTable, newSubExpr) = renameIdsInExpr table e
         val newTable = branchBack table subExprTable
@@ -54,13 +54,13 @@ struct
     | renameIdsInExpr table (BE_NodeN (to, opName, el)) =
       let
         val (subExprTable1, newSubExpr1) = ((renameIdsInExpr table (hd el)) handle Empty => raise IdentifierDuplicationError "the number of a builtin function arguments is wrong")
-        val (btb, nsel) = 
-          List.foldl (fn (e, (tb, nes)) => 
-              let 
+        val (btb, nsel) =
+          List.foldl (fn (e, (tb, nes)) =>
+              let
                 val (ntb, ne) = renameIdsInExpr (branchBack table tb) e
               in
-                (ntb, (nes @ [ne])) 
-              end) 
+                (ntb, (nes @ [ne]))
+              end)
           (subExprTable1, [newSubExpr1]) (tl el)
         val newTable = branchBack table btb
       in
@@ -93,13 +93,13 @@ struct
     | renameIdsInExpr table (BE_ExSet (to, el)) =
       let
         val (subExprTable1, newSubExpr1) = renameIdsInExpr table (hd el)
-        val (btb, nsel) = 
-          List.foldl (fn (e, (tb, nes)) => 
-              let 
+        val (btb, nsel) =
+          List.foldl (fn (e, (tb, nes)) =>
+              let
                 val (ntb, ne) = renameIdsInExpr (branchBack table tb) e
               in
-                (ntb, (nes @ [ne])) 
-              end) 
+                (ntb, (nes @ [ne]))
+              end)
           (subExprTable1, [newSubExpr1]) (tl el)
         val newTable = branchBack table btb
       in
@@ -117,13 +117,13 @@ struct
     | renameIdsInExpr table (BE_Seq (to, el)) =
       let
         val (subExprTable1, newSubExpr1) = renameIdsInExpr table (hd el)
-        val (btb, nsel) = 
-          List.foldl (fn (e, (tb, nes)) => 
-              let 
+        val (btb, nsel) =
+          List.foldl (fn (e, (tb, nes)) =>
+              let
                 val (ntb, ne) = renameIdsInExpr (branchBack table tb) e
               in
-                (ntb, (nes @ [ne])) 
-              end) 
+                (ntb, (nes @ [ne]))
+              end)
           (subExprTable1, [newSubExpr1]) (tl el)
         val newTable = branchBack table btb
       in
@@ -195,13 +195,13 @@ struct
     | renameIdsInExpr table (BE_Struct (to, l)) =
       let
         val (subExprTable1, newSubExpr1) =  renameIdsInExpr table (#2 (hd l))
-        val (btb, nl) = 
-          List.foldl (fn ((s, e), (tb, nes)) => 
-              let 
+        val (btb, nl) =
+          List.foldl (fn ((s, e), (tb, nes)) =>
+              let
                 val (ntb, ne) = renameIdsInExpr (branchBack table tb) e
               in
-                (ntb, (nes @ [(s, ne)])) 
-              end) 
+                (ntb, (nes @ [(s, ne)]))
+              end)
           (subExprTable1, [(#1 (hd l), newSubExpr1)]) l
         val newTable = branchBack table btb
       in
@@ -211,13 +211,13 @@ struct
     | renameIdsInExpr table (BE_Rec (to, l)) =
       let
         val (subExprTable1, newSubExpr1) =  renameIdsInExpr table (#2 (hd l))
-        val (btb, nl) = 
-          List.foldl (fn ((s, e), (tb, nes)) => 
-              let 
+        val (btb, nl) =
+          List.foldl (fn ((s, e), (tb, nes)) =>
+              let
                 val (ntb, ne) = renameIdsInExpr (branchBack table tb) e
               in
-                (ntb, (nes @ [(s, ne)])) 
-              end) 
+                (ntb, (nes @ [(s, ne)]))
+              end)
           (subExprTable1, [(#1 (hd l), newSubExpr1)]) l
         val newTable = branchBack table btb
       in
@@ -229,17 +229,17 @@ struct
         val newTable = branchBack table subExprTable
       in
         (newTable, BE_RcAc (to, newSubExpr, str))
-      end    
+      end
     | renameIdsInExpr table (BE_Commutative (to, opName, el)) =
       let
         val (subExprTable1, newSubExpr1) = ((renameIdsInExpr table (hd el)) handle Empty => raise IdentifierDuplicationError "the number of commutative operands is invalid")
-        val (btb, nsel) = 
-          List.foldl (fn (e, (tb, nes)) => 
-              let 
+        val (btb, nsel) =
+          List.foldl (fn (e, (tb, nes)) =>
+              let
                 val (ntb, ne) = renameIdsInExpr (branchBack table tb) e
               in
-                (ntb, (nes @ [ne])) 
-              end) 
+                (ntb, (nes @ [ne]))
+              end)
           (subExprTable1, [newSubExpr1]) (tl el)
         val newTable = branchBack table btb
       in
@@ -311,7 +311,7 @@ struct
         (case (renameIdsInSubstitutions table (BS_If l)) of
           (newTable, BS_If nbl) => (newTable, BS_Select nbl)
         | _                     => raise IdentifierDuplicationError "")
-    | renameIdsInSubstitutions _ (BS_Case (_, [])) = raise IdentifierDuplicationError "empty CASE substitution"    
+    | renameIdsInSubstitutions _ (BS_Case (_, [])) = raise IdentifierDuplicationError "empty CASE substitution"
     | renameIdsInSubstitutions table (BS_Case (initExpr, (el1, s1)::xs)) =
       let
         val (initEtb, newInitExpr) = renameIdsInExpr table initExpr
@@ -440,7 +440,7 @@ struct
             (newTable, BS_Choice nl) => (newTable, BS_Simultaneous nl)
             | _ => raise IdentifierDuplicationError "")
     | renameIdsInSubstitutions _ _ = raise IdentifierDuplicationError "resolving of duplication of identifiers is only for models"
-            
+
   fun renameIdsInOp table (BOp (opName, oparams, iparams, s)) =
       let
         val (otb, noparams) = mergeTable table oparams
@@ -459,7 +459,7 @@ struct
         (newTable, (BC_INITIALISATION ns))
       end
     | renameIdsInInitialisation _ _ = raise IdentifierDuplicationError ""
-      
+
   fun renameIdsInOperations _ (BC_OPERATIONS []) = raise IdentifierDuplicationError ""
     | renameIdsInOperations table (BC_OPERATIONS (op1 :: ops)) =
       let
@@ -474,7 +474,7 @@ struct
         (newTable, (BC_OPERATIONS nopl))
       end
     | renameIdsInOperations _ _ = raise IdentifierDuplicationError ""
-      
+
   fun renameIdsInConditions table (BC_CONSTRAINTS (BP e)) =
       let
         val (tb, ne) = renameIdsInExpr table e
@@ -500,14 +500,14 @@ struct
         (branchBack table tb, (BC_ASSERTIONS (BP ne)))
       end
     | renameIdsInConditions _ _ = raise IdentifierDuplicationError ""
-  
+
   fun resolve (BMch (name, params, clauses)) =
       let
         val sets = case (List.find (fn (BC_SETS _) => true | _ => false) clauses) of
                      NONE => []
                    | SOME (BC_SETS tl) => tl
                    | _ => raise IdentifierDuplicationError ""
-        val typeSets = List.concat (List.map (fn (BT_Deferred str) => [(Var str)] | (BT_Enum (str, _)) => [(Var str)] | _ => []) sets) 
+        val typeSets = List.concat (List.map (fn (BT_Deferred str) => [(Var str)] | (BT_Enum (str, _)) => [(Var str)] | _ => []) sets)
         val enumElements = List.concat (List.map (fn (BT_Enum (_, el)) => List.map (fn str => Var str) el | _ => []) sets)
         val aconstants = case (List.find (fn (BC_ACONSTANTS _) => true | _ => false) clauses) of
                            NONE => []
@@ -525,9 +525,9 @@ struct
                            NONE => []
                          | SOME (BC_CVARIABLES vl) => vl
                          | _ => raise IdentifierDuplicationError ""
-        val toplevelIdentifiers = params @ typeSets @ enumElements @ aconstants @ cconstants @ avariables @ cvariables 
+        val toplevelIdentifiers = params @ typeSets @ enumElements @ aconstants @ cconstants @ avariables @ cvariables
         (* トップレベルの識別子：マシンパラメータ、定数、変数、型集合、列挙集合の要素 *)
-        fun updateTopLevel (BC_SETS tl) = 
+        fun updateTopLevel (BC_SETS tl) =
             let
               fun updateTopLevelInternal (BT_Deferred str) = BT_Deferred (str ^ "_" ^ (Utils.intToFixedString digit 1))
                 | updateTopLevelInternal (BT_Enum (str, el)) =
@@ -575,7 +575,7 @@ struct
             end
         val rewrittenTopLevel = rewrittenConditions @ clausesExceptConditions
         val clausesExceptInitAndOp = List.filter (fn (BC_OPERATIONS _) => false | (BC_INITIALISATION _) => false | _ => true) rewrittenTopLevel
-        val initialisationOpt = List.find (fn (BC_INITIALISATION _) => true | _ => false) rewrittenTopLevel        
+        val initialisationOpt = List.find (fn (BC_INITIALISATION _) => true | _ => false) rewrittenTopLevel
         val operationsOpt     = List.find (fn (BC_OPERATIONS _)     => true | _ => false) rewrittenTopLevel
         val newClauses = (case (initialisationOpt, operationsOpt) of
                             (NONE, NONE) => rewrittenTopLevel

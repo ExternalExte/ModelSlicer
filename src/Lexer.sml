@@ -24,10 +24,10 @@ struct
             c1 = #"." (* 先頭文字が.の場合 *)
           then
             let
-              val c2 = String.sub (code, 1) 
+              val c2 = String.sub (code, 1)
             in
               if
-                c2 = #"." orelse c2 = #"(" 
+                c2 = #"." orelse c2 = #"("
               then
                 0
               else
@@ -35,7 +35,7 @@ struct
             end
           else if
             Char.isSpace c1 orelse (Keywords.isSymbol c1 andalso c1 <> #"_") (* 先頭文字がスペース類もしくはアンダーバー以外の記号 (識別子の区切り文字) の場合  *)
-          then 
+          then
             0
           else
             1 + getVarN (String.extract (code, 1, NONE)) (* 先頭文字が識別子の一部である場合 *)
@@ -46,7 +46,7 @@ struct
         val varN       = getVarN code
         val allIdStr   = String.extract (code, 0,    SOME varN)
         val rest       = String.extract (code, varN, NONE)
-        (* 
+        (*
         val allVarList = List.map String.implode (Utils.chopList (Utils.eqto #".") (String.explode allIdStr))
         *)
       in(*
@@ -60,10 +60,10 @@ struct
 
   (* 文字列を受け取り、先頭から何文字 (何桁) 整数として切り出せるかを返す関数 *)
   fun getDigitsN code =
-      if 
-        code = "" 
+      if
+        code = ""
       then
-        0 
+        0
       else
         let
           val c = String.sub (code, 0)
@@ -139,10 +139,10 @@ struct
   (* val tokenize : string -> [BToken] *)
   (* ドットを使ったrenameされた識別子にもリストで対応しているが、モデル展開後のモデルにその記法が表れることはない *)
   fun tokenize code =
-      if 
+      if
         code = ""
-      then 
-        [] 
+      then
+        []
       else
         let
           val c = String.sub (code, 0)
@@ -188,7 +188,7 @@ struct
                   else
                     raise LexerError "unknown character"
 	              end
-            end	
+            end
           else if
             c = #"\""
           then
@@ -196,15 +196,15 @@ struct
               val strN = getStrN (String.extract (code, 1, NONE))
             in
               StringLiteral (String.extract (code, 1, SOME strN)) :: tokenize (String.extract (code, 2 + strN, NONE))
-            end 
+            end
           else
-            let 
+            let
               val klist = List.find (fn x => String.isPrefix x code) Keywords.keywords
               val alist = List.find (fn x => String.isPrefix x code) Keywords.alphaKeywords
             in
-              if 
+              if
                 klist <> NONE
-              then 
+              then
                 let
                   val newSymbolBTokenString = valOf klist
                 in
@@ -218,7 +218,7 @@ struct
                   val rest = String.extract (code, String.size newAlphaBTokenString, NONE)
                 in
                   if
-                    rest = "" orelse Char.isSpace (String.sub (rest, 0)) orelse (Keywords.isSymbol (String.sub (rest, 0)) (* コード終端または次がスペースまたは次が記号 *) 
+                    rest = "" orelse Char.isSpace (String.sub (rest, 0)) orelse (Keywords.isSymbol (String.sub (rest, 0)) (* コード終端または次がスペースまたは次が記号 *)
                     andalso (String.sub (rest, 0)) <> #"_") (* 次がアンダーバーでない *)
                   then
                     Keyword newAlphaBTokenString :: tokenize rest (* アルファベット予約語 *)
@@ -246,7 +246,7 @@ struct
                     IntegerLiteral (valOf (IntInf.fromString (String.extract (code, 0, SOME digitN)))) :: tokenize rest
                   else if
                     rest <> "." andalso Char.isDigit (String.sub (rest, 1)) (* restは非空文字列 & restの先頭は"." & rest = "."でない & "."の次は数字 *)
-                  then  
+                  then
                     let
                       val underpointRest = String.extract (rest, 1, NONE)
                       val fractionalDigitN = getDigitsN underpointRest

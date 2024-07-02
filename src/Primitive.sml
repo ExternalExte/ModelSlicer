@@ -8,7 +8,7 @@ struct
           NONE              => (BE_Leaf (to, Var vn))
         | (SOME (Var _, e)) => e
         | _ => raise PrimitiveError "")
-        
+
     | applyLetEnv env (BE_Leaf  (to, x))              = BE_Leaf  (to, x)
     | applyLetEnv env (BE_Node1 (to, opName, e))      = BE_Node1 (to, opName, applyLetEnv env e)
     | applyLetEnv env (BE_Node2 (to, opName, e1, e2)) = BE_Node2 (to, opName, applyLetEnv env e1, applyLetEnv env e2)
@@ -70,7 +70,7 @@ struct
     | applyLetEnv env (BE_Rec         (to, l))          = BE_Rec         (to, List.map (fn (stro, e) => (stro, applyLetEnv env e)) l)
     | applyLetEnv env (BE_RcAc        (to, e, str))     = BE_RcAc        (to, applyLetEnv env e, str)
     | applyLetEnv env (BE_Commutative (to, opName, el)) = BE_Commutative (to, opName,            List.map (applyLetEnv env) el)
-    
+
   fun expandLetInSubstitutionTree env (BS_Block s)                     = BS_Block (expandLetInSubstitutionTree env s)
     | expandLetInSubstitutionTree env BS_Identity                      = BS_Identity
     | expandLetInSubstitutionTree env (BS_Precondition (BP e, s))      = BS_Precondition (BP (applyLetEnv env e), expandLetInSubstitutionTree env s)
@@ -96,10 +96,10 @@ struct
     | expandLetInSubstitutionTree env (BS_BecomesEqualList (el1, el2))       = BS_BecomesEqualList (List.map (applyLetEnv env) el1, List.map (applyLetEnv env) el2)
     | expandLetInSubstitutionTree env (BS_Simultaneous sl)                   = BS_Simultaneous (List.map (expandLetInSubstitutionTree env) sl)
     | expandLetInSubstitutionTree env _                                      = raise PrimitiveError "unsupported substitution"
-    
+
   (* 使われていない識別子名を生成するための番号 *)
   val unusedIdStrNumber = ref 0
-  
+
   fun generateUnusedIdStr usedIdStrs =
       let
         val _ = unusedIdStrNumber := !unusedIdStrNumber + 1;
@@ -115,7 +115,7 @@ struct
 
   fun extractUsedIdStrs (BE_Leaf (_, Var str)) = [str]
     | extractUsedIdStrs expr = List.concat (List.map extractUsedIdStrs (AST.subExprTrees expr))
-  
+
   fun primitiveExpr (BE_ExSet (to, [e])) = BE_ExSet (to, [e])
     | primitiveExpr (BE_ExSet (to, el))  = BE_Commutative (to, Keyword "\\/", List.map (fn e => BE_ExSet (to, [e])) el)
     | primitiveExpr (BE_ForAll (lvs, BP e1, BP e2)) = BE_Node1 (SOME BT_Predicate, Keyword "not", BE_Exists (lvs, BP (BE_Commutative (SOME BT_Predicate, Keyword "&", [e1, BE_Node1 (SOME BT_Predicate, Keyword "not", e2)]))))
@@ -127,7 +127,7 @@ struct
         BE_Node2 (to, Keyword "^", (primitiveExpr (BE_Seq (to, List.rev reversed))), BE_Seq (to, [lastElement]))
       end
     | primitiveExpr e = e
-  
+
   fun primitiveSubstitution (BS_Block s) = s
     | primitiveSubstitution (BS_BecomesEqual (BE_Fnc (_, f, e1), e2)) =
         BS_BecomesEqual (f, BE_Node2 (NONE, Keyword "<+", f, BE_ExSet (NONE, [(BE_Node2 (NONE, Keyword "|->", e1, e2))])))
@@ -145,7 +145,7 @@ struct
       in
         BS_If (List.map primitiveSubstitutionAux l)
       end
-    | primitiveSubstitution (BS_BecomesElt (el, re)) = 
+    | primitiveSubstitution (BS_BecomesElt (el, re)) =
       let
         val usedIdsInExprs = (List.concat (List.map extractUsedIdStrs el)) @ (extractUsedIdStrs re)
         fun generateUnusedIdStrList _ 0 = []
@@ -166,7 +166,7 @@ struct
       end
     | primitiveSubstitution (BS_BecomesEqualList (el1, el2)) = BS_Simultaneous (ListPair.map (fn (e1, e2) => BS_BecomesEqual (e1, e2)) (el1, el2))
     | primitiveSubstitution s = s
-      
+
   fun primitiveSubstitutionTree s = AST.mapExprsInSubstitutionTree primitiveExpr (AST.mapSubstitutionTree primitiveSubstitution s)
 
   fun primitiveOperation (BOp (name, oparam, iparam, s)) = BOp (name, oparam, iparam, Utils.repeatApply primitiveSubstitutionTree (expandLetInSubstitutionTree [] s))

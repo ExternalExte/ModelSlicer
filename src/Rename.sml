@@ -166,7 +166,7 @@ struct
       let
         val (newExpr, newHistory, _) = renameLocalVarsInExpr history "pl" 1 expr
       in
-        (newExpr, List.map (fn (bf, af) => (bf, af, SOME newExpr)) newHistory) 
+        (newExpr, List.map (fn (bf, af) => (bf, af, SOME newExpr)) newHistory)
       end
 
   fun renameMachineParams [] = ([], [] : (string * string) list)
@@ -219,7 +219,7 @@ struct
           | renameSetDeclarations _ = raise RenameError ""
       in
         renameSetDeclarations l
-      end      
+      end
 
   fun renameSets l =
     let
@@ -244,8 +244,8 @@ struct
     in
       (SOME (BC_SETS (renameIdentifiersInSets history l)), history)
     end
-    
-  fun getVarDeclarationsHistory prefix l = 
+
+  fun getVarDeclarationsHistory prefix l =
     let
       val count = ref 1
       fun getVarDeclarationsHistoryAux [] = []
@@ -258,7 +258,7 @@ struct
         | getVarDeclarationsHistoryAux _ = raise RenameError "invalid local variable declaration"
     in
       getVarDeclarationsHistoryAux l
-    end 
+    end
 
   fun renameAConstants l =
       let
@@ -275,9 +275,9 @@ struct
       in
         (SOME (BC_CCONSTANTS (List.map (fn x => Var x) after)), history)
       end
-      
+
   fun renameProperties history count expr = case renameLocalVarsInExpr history "lv" count expr of (newExpr, newHistory, newCount) => (SOME (BC_PROPERTIES (BP newExpr)), newHistory, newCount)
-  
+
   fun renameAVariables l =
       let
         val history = getVarDeclarationsHistory "av" l
@@ -392,7 +392,7 @@ struct
         val (_, newInputStrs)  = ListPair.unzip inputsHistory
         val newInputs  = List.map (fn x => Var x) newInputStrs
         val (newPreconditionExpr, preconditionHistory) = renameLocalVarsInPrecondition (history @ inputsHistory @ outputsHistory) preconditionExpr
-        
+
         val (newSubstitution, substitutionHistory, _, _) = renameLocalVarsInSubstitution (history @ inputsHistory @ outputsHistory) 1 count substitution
 
         val newHistory = (List.map (fn (bf, af) => (bf, af, NONE)) (outputsHistory @ inputsHistory @ substitutionHistory)) @ preconditionHistory
@@ -423,14 +423,14 @@ struct
     let
       (* - マシンパラメータ *)
       val (resultMachineParams, machineParamsHistory) = renameMachineParams machineParams
-      
+
       (* - CONSTRAINTS *)
       val (resultConstraintsOpt, localVarsInConstraintsHistory, localVarsCountConstraints) =
         case List.find (fn (BC_CONSTRAINTS _) => true | _ => false) clauses of
           NONE => (NONE, [], 1)
         | (SOME (BC_CONSTRAINTS (BP e))) => renameConstraints machineParamsHistory e (*renameLocalVarsInExpr "lv" 1 e*)
         | _ => raise RenameError ""
-        
+
       (* - SETS *)
       val (resultSetsOpt, setsHistory) =
         case List.find (fn (BC_SETS _)        => true | _ => false) clauses of
@@ -453,7 +453,7 @@ struct
         | _ => raise RenameError ""
 
       val historyBeforeProperties = machineParamsHistory @ localVarsInConstraintsHistory @ setsHistory @ aconstantsHistory @ cconstantsHistory
-      
+
       (* - PROPERTIES *)
       val (resultPropertiesOpt, localVarsInPropertiesHistory, localVarsCountProperties) =
         case List.find (fn (BC_PROPERTIES _)  => true | _ => false) clauses of
@@ -476,7 +476,7 @@ struct
         | _ => raise RenameError ""
 
       val historyBeforeInvariant = historyBeforeProperties @ localVarsInPropertiesHistory @ avariablesHistory @ cvariablesHistory
-      
+
       (* - INVARIANT *)
       val (resultInvariantOpt, localVarsInInvariantHistory, localVarsCountInvariant) =
         case List.find (fn (BC_INVARIANT _) => true | _ => false) clauses of
@@ -484,8 +484,8 @@ struct
         | (SOME (BC_INVARIANT (BP e)))   => renameInvariant historyBeforeInvariant localVarsCountProperties e(*renameLocalVarsInExpr "lv" localVarsCountProperties e*)
         | _ => raise RenameError ""
 
-      val historyBeforeOperations = historyBeforeInvariant @ localVarsInInvariantHistory 
-      
+      val historyBeforeOperations = historyBeforeInvariant @ localVarsInInvariantHistory
+
       (* - OPERATIONS *)
       val (resultOperationsOpt, localVarsInOperationHistory) =
         case List.find (fn (BC_OPERATIONS _) => true | _ => false) clauses of
@@ -512,5 +512,5 @@ struct
       (resultMachine, resultHistory)
     end
    | rename _ = raise RenameError "Renaming is only for models"
-   
+
 end

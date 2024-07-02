@@ -73,9 +73,9 @@ struct
             in
               Utils.deleteDouble Utils.eqto (List.concat (List.map (traceAux [initialIndexedSubstitution]) fstDependings))
             end
-            
+
         (* グラフのエッジを代入文の番号のみを用いて表現したもの *)
-        val graphEdgesById = List.map (fn ((i1, _), (i2, _)) => (i1, i2)) graphEdges 
+        val graphEdgesById = List.map (fn ((i1, _), (i2, _)) => (i1, i2)) graphEdges
       in
         (* gropingIndexedSubstitutions関数でallIndexedSubstitutionsを参照するため、独立している代入文は含まれなくてもOK *)
         (List.map trace indexedSubstitutions, graphEdgesById)
@@ -84,7 +84,7 @@ struct
   (* 他の番号付き代入文と相互に依存しないような番号付き代入文を含まない、要素に重複を許した番号付き代入文のグループのリストと全ての番号付き代入文のリストを受け取り、
       重複無く全番号付き代入文を含むような番号付き代入文のグループのリストを返す *)
       (* (int * BSubstitution) list list -> (int * BSubstitution) list -> (int * BSubstitution) list list *)
-      (* [[相互に依存する番号付き代入文の集合 (要素に重複あり・独立した代入文を含まない) ]] -> [全ての番号付き代入文] 
+      (* [[相互に依存する番号付き代入文の集合 (要素に重複あり・独立した代入文を含まない) ]] -> [全ての番号付き代入文]
         -> [[全ての番号付き代入文を相互依存によってグループ化したもの (重複なし・全番号付き代入文を含む) ]] *)
   fun groupingIndexedSubstitutions (codependentSets : (int * BSubstitution) list list) ([] : (int * BSubstitution) list) : (int * BSubstitution) list list = codependentSets
     | groupingIndexedSubstitutions codependentSets (is :: iss) =
@@ -104,7 +104,7 @@ struct
         fun conjunction [] = raise OpDivError ""
           | conjunction [e] = e
           | conjunction es = BE_Commutative (SOME BT_Predicate, Keyword "&", es)
-          
+
         fun deleteSkipsInIfBranches skippedConditions ((SOME (BP e), BS_Identity) :: r) = deleteSkipsInIfBranches (e :: skippedConditions) r
           | deleteSkipsInIfBranches skippedConditions ((SOME (BP e), s          ) :: r) =
             let
@@ -123,7 +123,7 @@ struct
             end
           | deleteSkipsInIfBranches _                 []                                = []
           | deleteSkipsInIfBranches _                 _                                 = raise OpDivError "invalid IF"
-                               
+
       in
         case deleteSkipsInIfBranches [] l of [] => BS_Identity | res => BS_If res
       end
@@ -144,7 +144,7 @@ struct
           []  => BS_Identity
         | [s] => s
         | ss  => BS_Sequencing ss
-      )    
+      )
     | simplifySubstitution s = s
 
   fun simplifySubstitutionTree s = Utils.repeatApply (AST.mapSubstitutionTree simplifySubstitution) s
@@ -179,7 +179,7 @@ struct
             end
 
          val allDividedSubstitutionList = List.map (fn v => extractSubstitutionChangingVar v substitution) allChangedVars
-         
+
          (* 最小単位の代入文に被りがあるならばtrue *)
          fun isMergeableByChangedVars (BS_Block        s1         ) (BS_Block        s2         ) = isMergeableByChangedVars s1 s2
            | isMergeableByChangedVars BS_Identity                   _                             = false
@@ -279,7 +279,7 @@ struct
   (* 初期化の代入文を受け取り、名前付きの分割結果の操作のリストを返す *)
       (* BSubstitution -> (string * BOperation) list *)
       (* INITIALISATIONの代入文 -> [(細分化モデルのファイル名になるべき文字列の後半 (番号), 分割後の操作)] *)
-  fun divideInitialisationSubstitution s = 
+  fun divideInitialisationSubstitution s =
     let
       val ss = divideSubstitution s
     in
@@ -315,7 +315,7 @@ struct
                                  (SOME (BC_INITIALISATION s)) =>
                                    let
                                      val changedInOriginalInit = #1(AST.extractVars s)
-                                     val dividedOps = divideInitialisationSubstitution s 
+                                     val dividedOps = divideInitialisationSubstitution s
                                      val newClausesList = List.map (fn (slicedModelName, opr) => (slicedModelName, (BC_OPERATIONS [opr]) :: clausesWithoutSubstitutions)) dividedOps
                                    in
                                      List.map (fn (slicedModelName, x) => (makeInitialisationMachineName slicedModelName, BMch ("Mch", param, x), changedInOriginalInit, [])) newClausesList

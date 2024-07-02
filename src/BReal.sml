@@ -9,7 +9,7 @@ sig
   val add : bReal -> bReal -> bReal
   val sub : bReal -> bReal -> bReal
   val mul : bReal -> bReal -> bReal
-  
+
   val compare : bReal * bReal -> order
 
   val toString : bReal -> string
@@ -17,7 +17,7 @@ sig
 
   val fromIntInf : IntInf.int -> bReal
   val fii : IntInf.int -> bReal (* 短縮 *)
-  
+
   val fromString : string -> bReal
   val fs : string -> bReal (* 短縮 *)
 end
@@ -35,8 +35,8 @@ struct
       else
         symplifyDecimal (x div 10, d - 1)
 
-  fun add ((x1, d1) : bReal) ((x2, d2) : bReal) = 
-      if d1 = d2 then 
+  fun add ((x1, d1) : bReal) ((x2, d2) : bReal) =
+      if d1 = d2 then
         symplifyDecimal ((x1 + x2, d1) : bReal)
       else
         if d1 > d2 then
@@ -49,8 +49,8 @@ struct
   fun mul ((x1, d1) : bReal) ((x2, d2) : bReal) = symplifyDecimal ((x1 * x2, d1 + d2) : bReal)
 
   fun compare (a, b) = let val (x, d) = sub a b in IntInf.compare (x, 0) end
-  
-  fun toString ((x, d) : bReal) = 
+
+  fun toString ((x, d) : bReal) =
       let
         val dstr = IntInf.toString x
         fun mulstr s n = if n < 0 then raise NotNaturalNumber else if n = 0 then "" else s ^ (mulstr s (n - 1))
@@ -69,9 +69,9 @@ struct
   val fii = fromIntInf
 
   (* 小数点省略不可 *)
-  fun fromString str = 
+  fun fromString str =
       let
-        val dlst = String.tokens (Utils.eqto #".") str 
+        val dlst = String.tokens (Utils.eqto #".") str
       in
         case dlst of
           [a, b] => symplifyDecimal ((valOf (IntInf.fromString (a ^ b)), String.size b) : bReal)
@@ -82,7 +82,7 @@ struct
   val zero = fromString "0.0"
 
   fun isMinus x = compare (x, zero) = LESS
-  
+
 end
 
 

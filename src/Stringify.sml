@@ -1,15 +1,15 @@
 structure Stringify =
 struct
   exception StringifyError of string
-  
+
   fun tabs depth = Utils.repeatString "\t" depth
-  
+
   and
       priOf (BE_Node1 (_, Keyword "~"  , _   )) = (230, Priority.L)
     | priOf (BE_Node1 (_, Keyword "-"  , _   )) = (210, Priority.N)
     | priOf (BE_Node2 (_, Keyword "mod", _, _)) = (190, Priority.L)
     | priOf (BE_Node2 (_, Keyword ":"  , _, _)) = ( 60, Priority.L)
-    (* 
+    (*
       これは集合への帰属
       念の為レコードのフィールドの":"と区別する
     *)
@@ -20,11 +20,11 @@ struct
     | priOf (BE_RcAc _)                         = (250, Priority.L)
     | priOf _                                   = (400, Priority.N)
   and
-      priOfT (Keyword s) = 
+      priOfT (Keyword s) =
       let
         val e = List.find (fn (x, _, _) => x = s) Priority.exprOperators
       in
-        case e of 
+        case e of
           NONE => (400, Priority.N) (* 組み込み関数 *)
         | SOME (_, pr, rl) => (pr, rl) (* 優先順位と結合規則 *)
       end
@@ -65,7 +65,7 @@ struct
     | clauseToClauseName (BC_ACONSTANTS _)     = "ABSTRACT_CONSTANTS"
     | clauseToClauseName (BC_CVARIABLES _)     = "CONCRETE_VARIABLES"
     | clauseToClauseName (BC_AVARIABLES _)     = "ABSTRACT_VARIABLES"
-    
+
     | clauseToClauseName (BC_SETS _)           = "SETS"
     | clauseToClauseName (BC_INITIALISATION _) = "INITIALISATION"
     | clauseToClauseName (BC_OPERATIONS _)     = "OPERATIONS"
@@ -91,7 +91,7 @@ struct
     | clauseToString (c as BC_AVARIABLES l)     = (clauseToClauseName c) ^ "\n\t" ^ (tokenListToString l) ^ "\n\n"
     | clauseToString (c as BC_DEFINITIONS l)    = "/*DEFINITIONS CLAUSE EXISTS*/\n" (* 未対応 *)
 
-    | clauseToString (c as BC_SETS l)           = 
+    | clauseToString (c as BC_SETS l)           =
       let
         fun setToString (BT_Deferred s) = s
           | setToString (BT_Enum (s, elts)) = s ^ " = {" ^ (Utils.concatWith ", " elts) ^ "}"
@@ -104,16 +104,16 @@ struct
 
   and
       operationToString (BOp (name, [],      [],     subs)) =
-      (tabs 1) ^ name ^ " =\n" ^ 
+      (tabs 1) ^ name ^ " =\n" ^
       (topSubstitutionToString subs)
     | operationToString (BOp (name, [],      inputs, subs)) =
-      (tabs 1) ^ name ^ "(" ^ (tokenListToString inputs) ^ ") =\n" ^ 
+      (tabs 1) ^ name ^ "(" ^ (tokenListToString inputs) ^ ") =\n" ^
       (topSubstitutionToString subs)
     | operationToString (BOp (name, outputs, [],     subs)) =
-      (tabs 1) ^ (tokenListToString outputs) ^ " <-- " ^ name ^ " =\n" ^ 
+      (tabs 1) ^ (tokenListToString outputs) ^ " <-- " ^ name ^ " =\n" ^
       (topSubstitutionToString subs)
-    | operationToString (BOp (name, outputs, inputs, subs)) = 
-      (tabs 1) ^ (tokenListToString outputs) ^ " <-- " ^ name ^ "(" ^ (tokenListToString inputs) ^ ") =\n" ^ 
+    | operationToString (BOp (name, outputs, inputs, subs)) =
+      (tabs 1) ^ (tokenListToString outputs) ^ " <-- " ^ name ^ "(" ^ (tokenListToString inputs) ^ ") =\n" ^
       (topSubstitutionToString subs)
   and
     (* Becomes such that 代入、同時代入、逐次代入、所属代入は操作のトップレベルに置けないためBEGIN ENDで囲む *)
@@ -124,146 +124,146 @@ struct
     | topSubstitutionToString s                      = substitutionToString 2 s
   and
       substitutionToString n (BS_Block s) =
-      (tabs n) ^ "BEGIN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "BEGIN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
     | substitutionToString n BS_Identity = (tabs n) ^ "skip"
-    | substitutionToString n (BS_Precondition (p, s)) = 
-      (tabs n) ^ "PRE\n" ^ 
+    | substitutionToString n (BS_Precondition (p, s)) =
+      (tabs n) ^ "PRE\n" ^
       (predicateToString (n + 1) p) ^ "\n" ^
-      (tabs n) ^ "THEN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "THEN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
     | substitutionToString n (BS_Assertion (p, s)) =
-      (tabs n) ^ "PRE\n" ^ 
+      (tabs n) ^ "PRE\n" ^
       (predicateToString (n + 1) p) ^ "\n" ^
-      (tabs n) ^ "THEN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "THEN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
-    | substitutionToString n (BS_Choice l) = 
+    | substitutionToString n (BS_Choice l) =
       let
         fun choiceAux [] = raise StringifyError ""
           | choiceAux [s] = (substitutionToString (n + 1) s) ^ "\n"
-          | choiceAux (s :: ss) = 
-            (substitutionToString (n + 1) s) ^ "\n" ^ 
+          | choiceAux (s :: ss) =
+            (substitutionToString (n + 1) s) ^ "\n" ^
             (tabs n) ^ "OR\n" ^ (choiceAux ss)
       in
-        (tabs n) ^ "CHOICE\n" ^ 
-        (choiceAux l) ^ 
+        (tabs n) ^ "CHOICE\n" ^
+        (choiceAux l) ^
         (tabs n) ^ "END"
       end
-    | substitutionToString n (BS_If ([(SOME p, s)])) = 
-      (tabs n) ^ "IF\n" ^ 
+    | substitutionToString n (BS_If ([(SOME p, s)])) =
+      (tabs n) ^ "IF\n" ^
       (predicateToString (n + 1) p) ^ "\n" ^
-      (tabs n) ^ "THEN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "THEN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
     | substitutionToString n (BS_If ((SOME p, s) :: l)) =
       let
         fun ifAux [(NONE, ss)] =
-            (tabs n) ^ "ELSE\n" ^ 
-            (substitutionToString (n + 1) ss) ^ "\n" ^ 
+            (tabs n) ^ "ELSE\n" ^
+            (substitutionToString (n + 1) ss) ^ "\n" ^
             (tabs n) ^ "END"
           | ifAux [(SOME pp, ss)] =
-            (tabs n) ^ "ELSIF\n" ^ 
+            (tabs n) ^ "ELSIF\n" ^
             (predicateToString (n + 1) pp) ^ "\n" ^
-            (tabs n) ^ "THEN\n" ^ 
-            (substitutionToString (n + 1) ss) ^ "\n" ^ 
+            (tabs n) ^ "THEN\n" ^
+            (substitutionToString (n + 1) ss) ^ "\n" ^
             (tabs n) ^ "END"
           | ifAux ((SOME pp, ss) :: ll) =
-            (tabs n) ^ "ELSIF\n" ^ 
+            (tabs n) ^ "ELSIF\n" ^
             (predicateToString (n + 1) pp) ^ "\n" ^
-            (tabs n) ^ "THEN\n" ^ 
-            (substitutionToString (n + 1) ss) ^ "\n" ^ 
+            (tabs n) ^ "THEN\n" ^
+            (substitutionToString (n + 1) ss) ^ "\n" ^
             (ifAux ll)
           | ifAux _ = raise StringifyError ""
       in
-        (tabs n) ^ "IF\n" ^ 
+        (tabs n) ^ "IF\n" ^
         (predicateToString (n + 1) p) ^ "\n" ^
-        (tabs n) ^ "THEN\n" ^ 
-        (substitutionToString (n + 1) s) ^ "\n" ^ 
+        (tabs n) ^ "THEN\n" ^
+        (substitutionToString (n + 1) s) ^ "\n" ^
         (ifAux l)
-      end 
+      end
     | substitutionToString _ (BS_If _) = raise StringifyError "invalid IF"
-    | substitutionToString n (BS_Select ([(SOME p, s)])) = 
-      (tabs n) ^ "SELECT\n" ^ 
+    | substitutionToString n (BS_Select ([(SOME p, s)])) =
+      (tabs n) ^ "SELECT\n" ^
       (predicateToString (n + 1) p) ^ "\n" ^
-      (tabs n) ^ "THEN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "THEN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
     | substitutionToString n (BS_Select ((SOME p, s) :: l)) =
       let
         fun selectAux [(NONE, ss)] =
-            (tabs n) ^ "ELSE\n" ^ 
-            (substitutionToString (n + 1) ss) ^ "\n" ^ 
+            (tabs n) ^ "ELSE\n" ^
+            (substitutionToString (n + 1) ss) ^ "\n" ^
             (tabs n) ^ "END"
           | selectAux [(SOME pp, ss)] =
-            (tabs n) ^ "WHEN\n" ^ 
-            (predicateToString (n + 1) pp) ^ "\n" ^ 
-            (tabs n) ^ "THEN\n" ^ 
-            (substitutionToString (n + 1) ss) ^ "\n" ^ 
+            (tabs n) ^ "WHEN\n" ^
+            (predicateToString (n + 1) pp) ^ "\n" ^
+            (tabs n) ^ "THEN\n" ^
+            (substitutionToString (n + 1) ss) ^ "\n" ^
             (tabs n) ^ "END"
           | selectAux ((SOME pp, ss) :: ll) =
-            (tabs n) ^ "WHEN\n" ^ 
+            (tabs n) ^ "WHEN\n" ^
             (predicateToString (n + 1) pp) ^ "\n" ^
-            (tabs n) ^ "THEN\n" ^ 
-            (substitutionToString (n + 1) ss) ^ "\n" ^ 
+            (tabs n) ^ "THEN\n" ^
+            (substitutionToString (n + 1) ss) ^ "\n" ^
             (selectAux ll)
           | selectAux _ = raise StringifyError ""
       in
-        (tabs n) ^ "SELECT\n" ^ 
+        (tabs n) ^ "SELECT\n" ^
         (predicateToString (n + 1) p) ^ "\n" ^
-        (tabs n) ^ "THEN\n" ^ 
-        (substitutionToString (n + 1) s) ^ "\n" ^ 
+        (tabs n) ^ "THEN\n" ^
+        (substitutionToString (n + 1) s) ^ "\n" ^
         (selectAux l)
-      end 
+      end
     | substitutionToString _ (BS_Select _) = raise StringifyError "invalid IF"
     | substitutionToString n (BS_Case (ex, [(es, s)])) =
-      (tabs n) ^ "CASE " ^ (exprToString ex) ^ " OF\n" ^ 
-      (tabs (n + 1)) ^ "EITHER " ^ (exprListInCaseToString es) ^ " THEN\n" ^ 
-      (substitutionToString (n + 2) s) ^ "\n" ^ 
-      (tabs (n + 1)) ^ "END\n" ^ 
+      (tabs n) ^ "CASE " ^ (exprToString ex) ^ " OF\n" ^
+      (tabs (n + 1)) ^ "EITHER " ^ (exprListInCaseToString es) ^ " THEN\n" ^
+      (substitutionToString (n + 2) s) ^ "\n" ^
+      (tabs (n + 1)) ^ "END\n" ^
       (tabs n) ^ "END"
     | substitutionToString n (BS_Case (ex, ((es, s) :: l))) =
       let
         fun caseAux [([], ss)] =
-            (tabs (n + 1)) ^ "ELSE\n" ^ 
-            (substitutionToString (n + 2) ss) ^ "\n" ^ 
-            (tabs (n + 1)) ^ "END\n" ^ 
+            (tabs (n + 1)) ^ "ELSE\n" ^
+            (substitutionToString (n + 2) ss) ^ "\n" ^
+            (tabs (n + 1)) ^ "END\n" ^
             (tabs n) ^ "END"
           | caseAux [(ees, ss)] =
-            (tabs (n + 1)) ^ "OR " ^ (exprListInCaseToString ees) ^ " THEN\n" ^ 
-            (substitutionToString (n + 2) ss) ^ "\n" ^ 
-            (tabs (n + 1)) ^ "END\n" ^ 
+            (tabs (n + 1)) ^ "OR " ^ (exprListInCaseToString ees) ^ " THEN\n" ^
+            (substitutionToString (n + 2) ss) ^ "\n" ^
+            (tabs (n + 1)) ^ "END\n" ^
             (tabs n) ^ "END"
-          | caseAux ((ees, ss) :: l) = 
-            (tabs (n + 1)) ^ "OR " ^ (exprListInCaseToString ees) ^ " THEN\n" ^ 
-            (substitutionToString (n + 2) ss) ^ "\n" ^ 
+          | caseAux ((ees, ss) :: l) =
+            (tabs (n + 1)) ^ "OR " ^ (exprListInCaseToString ees) ^ " THEN\n" ^
+            (substitutionToString (n + 2) ss) ^ "\n" ^
             (caseAux l)
           | caseAux _ = raise StringifyError ""
       in
-        (tabs n) ^ "CASE " ^ (exprToString ex) ^ " OF\n" ^ 
-        (tabs (n + 1)) ^ "EITHER " ^ (exprListToString es) ^ " THEN\n" ^ 
-        (substitutionToString (n + 2) s) ^ "\n" ^ 
+        (tabs n) ^ "CASE " ^ (exprToString ex) ^ " OF\n" ^
+        (tabs (n + 1)) ^ "EITHER " ^ (exprListToString es) ^ " THEN\n" ^
+        (substitutionToString (n + 2) s) ^ "\n" ^
         (caseAux l)
       end
     | substitutionToString _ (BS_Case _) = raise StringifyError "invalid CASE"
     | substitutionToString n (BS_Any (tlst, p, s)) =
-      (tabs n) ^ "ANY\n" ^ 
-      (tabs (n + 1)) ^ (tokenListToString tlst) ^ "\n" ^ 
-      (tabs n) ^ "WHERE\n" ^ 
+      (tabs n) ^ "ANY\n" ^
+      (tabs (n + 1)) ^ (tokenListToString tlst) ^ "\n" ^
+      (tabs n) ^ "WHERE\n" ^
       (predicateToString (n + 1) p) ^ "\n" ^
-      (tabs n) ^ "THEN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "THEN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
 
     | substitutionToString n (BS_Let (l, s)) =
-      (tabs n) ^ "LET\n" ^ 
-      (tabs (n + 1)) ^ (tokenListToString (List.map (fn (v, e) => v) l)) ^ "\n" ^ 
-      (tabs n) ^ "BE\n" ^ 
-      (Utils.concatWith " &\n" (List.map (fn (Var x, e) => ((tabs (n + 1)) ^ x ^ " = " ^ (exprToString e)) | _ => raise StringifyError "") l)) ^ "\n" ^ 
-      (tabs n) ^ "IN\n" ^ 
-      (substitutionToString (n + 1) s) ^ "\n" ^ 
+      (tabs n) ^ "LET\n" ^
+      (tabs (n + 1)) ^ (tokenListToString (List.map (fn (v, e) => v) l)) ^ "\n" ^
+      (tabs n) ^ "BE\n" ^
+      (Utils.concatWith " &\n" (List.map (fn (Var x, e) => ((tabs (n + 1)) ^ x ^ " = " ^ (exprToString e)) | _ => raise StringifyError "") l)) ^ "\n" ^
+      (tabs n) ^ "IN\n" ^
+      (substitutionToString (n + 1) s) ^ "\n" ^
       (tabs n) ^ "END"
 
     | substitutionToString n (BS_BecomesElt (el, re)) =
@@ -310,7 +310,7 @@ struct
     | machinesToString [(BMchInst (v, es))]         = "\t" ^ (tokenToString v) ^ (if es = [] then "" else "(" ^ (exprListToString es) ^ ")") ^ "\n"
     | machinesToString ((BMchInst (v, es)) :: rest) = "\t" ^ (tokenToString v) ^ (if es = [] then "" else "(" ^ (exprListToString es) ^ ")") ^ ",\n" ^ (machinesToString rest)
   and
-      predicateToString n (BP (BE_Commutative (_, Keyword "&", (e :: es)))) = 
+      predicateToString n (BP (BE_Commutative (_, Keyword "&", (e :: es)))) =
       let
         val s = if #1 (priOf e) < 40 then (tabs n) ^ "(" ^ (exprToString e) ^ ")" else (tabs n) ^ (exprToString e)
         val ss = List.map (fn x => if #1 (priOf x) <= 40 then (tabs n) ^ "(" ^ (exprToString x) ^ ")" else (tabs n) ^ (exprToString x)) es
@@ -320,12 +320,12 @@ struct
     | predicateToString n (BP e) = (tabs n) ^ (exprToString e)
   and
       exprToString (BE_Leaf (_, token)) = tokenToString token
-    | exprToString (BE_Node1 (_, Keyword "~", e)) = 
+    | exprToString (BE_Node1 (_, Keyword "~", e)) =
       if #1 (priOf e) <= 230 then
         "(" ^ (exprToString e) ^ ")~"
       else
         (exprToString e) ^ "~"
-    | exprToString (BE_Node1 (_, Keyword "-", e)) = 
+    | exprToString (BE_Node1 (_, Keyword "-", e)) =
       if #1 (priOf e) <= 210 then
         "(-(" ^ (exprToString e) ^ "))"
       else
@@ -338,7 +338,7 @@ struct
         val p1 = #1 (priOf e1)
         val p2 = #1 (priOf e2)
       in
-        (if p1 <  190 then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " mod " ^ 
+        (if p1 <  190 then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " mod " ^
         (if p2 <= 190 then "(" ^ (exprToString e2) ^ ")" else exprToString e2)
       end
     | exprToString (BE_Node2 (_ ,Keyword "or", e1, e2)) =
@@ -346,12 +346,12 @@ struct
         val p1 = #1 (priOf e1)
         val p2 = #1 (priOf e2)
       in
-        (if p1 < 40  then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " or " ^ 
+        (if p1 < 40  then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " or " ^
         (if p2 <= 40 then "(" ^ (exprToString e2) ^ ")" else exprToString e2)
       end
     | exprToString (BE_Node2 (_, Keyword ";" , e1, e2)) = "(" ^ (exprToString e1) ^ " ; "  ^ (exprToString e2) ^ ")" (* 操作の区切りなどを表す;と区別するため括弧をかならず付ける *)
-    | exprToString (BE_Node2 (_, Keyword "||", e1, e2)) = "(" ^ (exprToString e1) ^ " || " ^ (exprToString e2) ^ ")" 
-    | exprToString (BE_Node2 (_, Keyword s, e1, e2)) = 
+    | exprToString (BE_Node2 (_, Keyword "||", e1, e2)) = "(" ^ (exprToString e1) ^ " || " ^ (exprToString e2) ^ ")"
+    | exprToString (BE_Node2 (_, Keyword s, e1, e2)) =
       if
         List.exists (Utils.eqto s) Keywords.alphaKeywords
       then
@@ -363,10 +363,10 @@ struct
           val p2 = #1 (priOf e2)
         in
           if a = Priority.L then
-            (if p1 <  p then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " " ^ s ^ " " ^ 
+            (if p1 <  p then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " " ^ s ^ " " ^
             (if p2 <= p then "(" ^ (exprToString e2) ^ ")" else exprToString e2)
           else
-            (if p1 <= p then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " " ^ s ^ " " ^ 
+            (if p1 <= p then "(" ^ (exprToString e1) ^ ")" else exprToString e1) ^ " " ^ s ^ " " ^
             (if p2 <  p then "(" ^ (exprToString e2) ^ ")" else exprToString e2)
         end
 
@@ -381,8 +381,8 @@ struct
         (if fstep < p then "(" ^ (exprToString fste) ^ ")" else exprToString fste) ^ (concatExprList (tl pl))
       end
     | exprToString (BE_Fnc (_, e1, e2)) = (
-        if #1 (priOf e1) < 230 then 
-          "(" ^ (exprToString e1) ^ ")" 
+        if #1 (priOf e1) < 230 then
+          "(" ^ (exprToString e1) ^ ")"
         else
           case e1 of
             BE_RcAc _ => "(" ^ (exprToString e1) ^ ")"
@@ -390,21 +390,21 @@ struct
           | _         => exprToString e1              ) ^
         "(" ^ (exprToString e2) ^ ")"
     | exprToString (BE_Img (_, e1, e2)) = (
-        if #1 (priOf e1) < 230 then 
-          "(" ^ (exprToString e1) ^ ")" 
+        if #1 (priOf e1) < 230 then
+          "(" ^ (exprToString e1) ^ ")"
         else
           case e1 of
             BE_RcAc _ => "(" ^ (exprToString e1) ^ ")"
           | BE_Img _ => "(" ^ (exprToString e1) ^ ")"
           | _ => exprToString e1) ^ "[" ^ (exprToString e2) ^ "]"
-          
+
     | exprToString (BE_NodeN (_, Keyword s, es)) = s ^ "(" ^ (exprListToString es) ^ ")"
     | exprToString (BE_Bool (BP e)) = "bool(" ^ (exprToString e) ^ ")"
-    
+
     | exprToString (BE_ExSet (_, l)) = "{" ^ (exprListToString l) ^ "}"
 
     | exprToString (BE_InSet (_, v, BP p)) = "{" ^ (tokenListToString v) ^ " | " ^ (exprToString p) ^ "}"
-    
+
     | exprToString (BE_Seq (_, e)) = "[" ^ (exprListToString e) ^ "]"
 
     | exprToString (BE_ForAll ([], _, _)) = raise StringifyError "missing variables of \"!\""
@@ -424,7 +424,7 @@ struct
     | exprToString (BE_Struct (_, l)) =
       let
         fun fields [] = raise StringifyError "empty struct"
-          | fields [(s, e)] = 
+          | fields [(s, e)] =
             if
               #1 (priOf e) < 120
             then
@@ -441,13 +441,13 @@ struct
       in
         "struct(" ^ (fields l) ^ ")"
       end
-    
+
     | exprToString (BE_Rec (_, l)) =
       let
         fun unwrapLabel NONE = ""
-          | unwrapLabel (SOME s) = s ^ ":" 
+          | unwrapLabel (SOME s) = s ^ ":"
         fun fields [] = raise StringifyError "empty struct"
-          | fields [(sOpt, e)] = 
+          | fields [(sOpt, e)] =
             if
               #1 (priOf e) < 120
             then

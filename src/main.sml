@@ -54,7 +54,7 @@ fun modelslice inputFileName inputDir outputDir =
       val _ = print (inputFileName ^ " : constructing syntax tree\n")
 
       val beforeTime = Time.toMilliseconds (Time.now ())
-      
+
       (* 字句解析 *)
       val modelTokens = Lexer.tokenize inputString
 
@@ -87,7 +87,7 @@ fun modelslice inputFileName inputDir outputDir =
       fun applyDerivingImplicitConditions flag model =
           let
             fun printExecutionMessage phase = print (indent ^ " - " ^ phase ^ "\n")
-            val simplifyFunctionsList = 
+            val simplifyFunctionsList =
                   [
                     AST.mapExprsInComponent Commutative.flattenCommutative,
                     AST.mapExprsInComponent Simplify.simplifyExprTree,
@@ -104,7 +104,7 @@ fun modelslice inputFileName inputDir outputDir =
                       (printExecutionMessage "simplifying expressions and complement type information";
                        Utils.repeatApplyEqf (fn x => Utils.pam x simplifyFunctionsList) AST.eqComponents m))
                   ]
-            val implicitConditionFunctionsList = 
+            val implicitConditionFunctionsList =
                   [
                     (fn m =>
                       (printExecutionMessage "simplifying expressions and complement type information";
@@ -123,7 +123,7 @@ fun modelslice inputFileName inputDir outputDir =
           in
             Utils.repeatApplyEqf (fn x => Utils.pam x rewriteFunctionsList) AST.eqComponents (ImplicitCondition.rewriteEqualExprs flag implicitConditionsDerivedByRules)
           end
-          
+
       val implicitConditionDerived = TypeInference.typeComponent (applyDerivingImplicitConditions false ac)
 
       (* 操作分割 *)
@@ -131,7 +131,7 @@ fun modelslice inputFileName inputDir outputDir =
           (* [(細分化モデルのファイル名, 操作分割後の操作を一つしか持たないモデル, [自身より結合順が先になる細分化モデルのファイル名])] *)
       val _ = print (inputFileName ^ " : dividing operations\n")
       val oneOprModels = OperationDivision.divide implicitConditionDerived
-   
+
       (* 制約条件等抽出 => 「関連要素抽出」に変更予定 *)
           (* (string * BComponent * (string list)) list *)
           (* [(細分化モデルのファイル名, 関連要素抽出後 (関連しない要素の削除後) のモデル, [自身より結合順が先になる細分化モデルのファイル名])] *)
@@ -141,7 +141,7 @@ fun modelslice inputFileName inputDir outputDir =
       (* 代入文内の条件式も対象にした暗黙の条件の導出 *)
       val _ = print (inputFileName ^ " : rewriting expressions and deriving implicit conditions by rules (2)\n")
       val implicitConditionDerived2List = List.map (fn (n, m, d) => (n, applyDerivingImplicitConditions true m, d)) extractedModels
-      
+
       (* 構文要素整列 *)
       val _ = print (inputFileName ^ " : sorting\n")
       val sortedModels = List.map (fn (name, model, deps) => (name, Sort.sort model, deps)) implicitConditionDerived2List
@@ -151,14 +151,14 @@ fun modelslice inputFileName inputDir outputDir =
           (* [(細分化モデルファイル名, 識別子置換後の細分化モデル, [自身より結合順が先になる細分化モデルのファイル名])] *)
       val _ = print (inputFileName ^ " : renaming\n")
       val renamedModels = List.map (fn (name, model, deps) => (name, Rename.rename model, deps)) sortedModels
-      
+
       (* 細分化モデルの出力準備 *)
           (* (string * string) list *)
           (* [(細分化モデルの内容の文字列, 細分化モデルのファイル名)] *)
       val _ = print (inputFileName ^ " : outputting files\n")
       val outputs = List.map (fn (fileName, (m, h), d) => ((Stringify.componentToString m) ^ (Stringify.historyToString h) ^ (Stringify.modelDependenciesToString d), outputDir ^ "/" ^ fileName ^ ".mch")) renamedModels
       val afterTime = Time.toMilliseconds (Time.now ())
-      
+
       val nofResult = List.length renamedModels
       val allTimeInMilliseconds = Int.fromLarge (afterTime - beforeTime)
       val allTimeInSeconds = (Real.fromInt allTimeInMilliseconds) / 1000.0
