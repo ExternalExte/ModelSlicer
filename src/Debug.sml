@@ -17,43 +17,19 @@ use "BuiltinFnc.sml";
 use "Lexer.sml";
 use "Parser.sml";
 use "Show.sml";
-
-val inputFileName = "PointSystemWithIf2.mch"
-val inputDir = "../inputs"
-val _ = print (inputFileName ^ " : loading file\n")
-val fileNameLength = String.size inputFileName
-
-(* 入力モデルファイルの文字列 *)
-val inputString = Utils.fileToString (inputDir ^ "/" ^ inputFileName)
-
-val _ = print (inputFileName ^ " : constructing syntax tree\n")
-
-(* 字句解析 *)
-val modelTokens = Lexer.tokenize inputString
-
-(* 構文解析 *)
-val modelSyntaxTree = Parser.parse modelTokens
+use "Merge.sml";
 
 
-fun pickLibraryNames (BMch (name, params, clauses)) =
-  List.map (fn (BMchInst (token, exprs)) => token)
-  (List.concat
-    (List.map
-      (fn (clause: BClause) =>
-          case clause of
-            BC_SEES ls => ls
-            | BC_INCLUDES ls => ls
-            | BC_PROMOTES ls => ls
-            | BC_EXTENDS ls => ls
-            | BC_USES ls => ls
-            | BC_IMPORTS ls => ls
-            | _ => []
-      )
-      clauses
-    )
-  )
+val st1 = Parser.parse (Lexer.tokenize (Utils.fileToString ("../inputs/LibrarySystem.mch")))
 
-val _ = print (Show.showTokenList (pickLibraryNames modelSyntaxTree))
+val st2 = Parser.parse (Lexer.tokenize (Utils.fileToString ("../inputs/PointSystem.mch")))
 
+(* val _ = print (Show.showComponent st1) *)
+
+(* val _ = print (Show.showComponent st2) *)
+
+val merged = Merge.mergeComponent st1 st2
+
+val _ = print (Show.showComponent merged)
 
 val _ = OS.Process.exit OS.Process.success
