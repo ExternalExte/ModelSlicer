@@ -18,18 +18,38 @@ use "Lexer.sml";
 use "Parser.sml";
 use "Show.sml";
 use "Merge.sml";
+use "Primitive.sml";             (* 旧 BetaReduction.sml *)
+use "IdentifierDuplication.sml"; (* 旧 AlphaConversion.sml *)
+use "Stringify.sml";             (* 旧 PrintComponent.sml *)
+use "TypeInference.sml";
 
 
-val st1 = Parser.parse (Lexer.tokenize (Utils.fileToString ("../inputs/LibrarySystem.mch")))
+val modelSyntaxTree = Parser.parse (Lexer.tokenize (Utils.fileToString ("../inputs/Student.mch")))
 
-val st2 = Parser.parse (Lexer.tokenize (Utils.fileToString ("../inputs/PointSystem.mch")))
+(* val st2 = Parser.parse (Lexer.tokenize (Utils.fileToString ("../inputs/PointSystem.mch"))) *)
+
+val primitiveModel = Primitive.primitive modelSyntaxTree
+
+
+(* 局所変数の重複解消 *)
+val iddup = IdentifierDuplication.resolve primitiveModel
+
+
+(* 型推論 *)
+val typed = Utils.repeatApply TypeInference.typeComponent iddup
+
+
+(* 型情報の追記 *)
+val typePresented = TypeInference.presentTypeInfoInComponent typed
+
+val _ = print (Show.showComponent typePresented)
 
 (* val _ = print (Show.showComponent st1) *)
 
 (* val _ = print (Show.showComponent st2) *)
 
-val merged = Merge.mergeComponent st1 st2
+(* val merged = Merge.mergeComponent st1 st2 *)
 
-val _ = print (Show.showComponent merged)
+(* val _ = print (Show.showComponent merged) *)
 
 val _ = OS.Process.exit OS.Process.success
