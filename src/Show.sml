@@ -2,6 +2,20 @@ structure Show =
 struct
   exception ShowError of string
 
+  fun showType NONE = "  [NONE]"
+    | showType (SOME BT_Real) = "  [REAL]"
+    | showType (SOME BT_Integer) = "  [INTEGER]"
+    | showType (SOME BT_String) = "  [STRING]"
+    | showType (SOME BT_Float) = "  [FLOAT]"
+    | showType (SOME BT_Bool) = "  [BOOL]"
+    | showType (SOME (BT_Power x)) = "  [POW ("^(showType x)^")]"
+    | showType (SOME (BT_Pair (x, y))) = "  [" ^ (showType x)^"*"^(showType y) ^ "]"
+    | showType (SOME (BT_Struct _)) = "  [STRUCT]"
+    | showType (SOME (BT_Deferred s)) = "  [" ^ s ^ "]"
+    | showType (SOME (BT_Enum (s, sl))) = "  [" ^ s ^ "={" ^ (Utils.concatWith "," sl) ^ "}" ^ "]"
+    | showType (SOME BT_Predicate) = ""
+    (* | showType (SOME BT_Predicate) = "[PREDICATE]" *)
+
   fun tabs depth = Utils.repeatString "\t" depth
 
   and
@@ -328,43 +342,43 @@ struct
     | showPredicate n (BP e) = (tabs n) ^ (showExpr e)
 
   and
-      showExpr (BE_Leaf (_, token)) = showToken token
-    | showExpr (BE_Node1 (_, Keyword "~", e)) =
+      showExpr (BE_Leaf (t, token)) = (showType t) ^ (showToken token)
+    | showExpr (BE_Node1 (t, Keyword "~", e)) =
       if #1 (priOf e) <= 230 then
-        "(" ^ (showExpr e) ^ ")~"
+        (showType t) ^ "(" ^ (showExpr e) ^ ")~"
       else
-        (showExpr e) ^ "~"
-    | showExpr (BE_Node1 (_, Keyword "-", e)) =
+        (showType t) ^ (showExpr e) ^ "~"
+    | showExpr (BE_Node1 (t, Keyword "-", e)) =
       if #1 (priOf e) <= 210 then
-        "(-(" ^ (showExpr e) ^ "))"
+        (showType t) ^ "(-(" ^ (showExpr e) ^ "))"
       else
-        "(-" ^ (showExpr e) ^ ")"
+        (showType t) ^ "(-" ^ (showExpr e) ^ ")"
     (* 単項マイナス演算子の外側の括弧はB言語マニュアルによると必要ないはずだがAtelier Bでは無いとエラーとなる場合がある *)
-    | showExpr (BE_Node1 (_, Keyword s, e)) = s ^ "(" ^ (showExpr e) ^ ")"
+    | showExpr (BE_Node1 (t, Keyword s, e)) = (showType t) ^  s ^ "(" ^ (showExpr e) ^ ")"
 
-    | showExpr (BE_Node2 (_, Keyword "mod", e1, e2)) =
+    | showExpr (BE_Node2 (t, Keyword "mod", e1, e2)) =
       let
         val p1 = #1 (priOf e1)
         val p2 = #1 (priOf e2)
       in
-        (if p1 <  190 then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " mod " ^
+        (showType t) ^ (if p1 <  190 then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " mod " ^
         (if p2 <= 190 then "(" ^ (showExpr e2) ^ ")" else showExpr e2)
       end
-    | showExpr (BE_Node2 (_ ,Keyword "or", e1, e2)) =
+    | showExpr (BE_Node2 (t ,Keyword "or", e1, e2)) =
       let
         val p1 = #1 (priOf e1)
         val p2 = #1 (priOf e2)
       in
-        (if p1 < 40  then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " or " ^
+        (showType t) ^ (if p1 < 40  then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " or " ^
         (if p2 <= 40 then "(" ^ (showExpr e2) ^ ")" else showExpr e2)
       end
-    | showExpr (BE_Node2 (_, Keyword ";" , e1, e2)) = "(" ^ (showExpr e1) ^ " ; "  ^ (showExpr e2) ^ ")" (* 操作の区切りなどを表す;と区別するため括弧をかならず付ける *)
-    | showExpr (BE_Node2 (_, Keyword "||", e1, e2)) = "(" ^ (showExpr e1) ^ " || " ^ (showExpr e2) ^ ")"
-    | showExpr (BE_Node2 (_, Keyword s, e1, e2)) =
+    | showExpr (BE_Node2 (t, Keyword ";" , e1, e2)) = (showType t) ^ "(" ^ (showExpr e1) ^ " ; "  ^ (showExpr e2) ^ ")" (* 操作の区切りなどを表す;と区別するため括弧をかならず付ける *)
+    | showExpr (BE_Node2 (t, Keyword "||", e1, e2)) = (showType t) ^ "(" ^ (showExpr e1) ^ " || " ^ (showExpr e2) ^ ")"
+    | showExpr (BE_Node2 (t, Keyword s, e1, e2)) =
       if
         List.exists (Utils.eqto s) Keywords.alphaKeywords
       then
-        s ^ "(" ^ (showExpr e1) ^ ", " ^ (showExpr e2) ^ ")"
+        (showType t) ^ s ^ "(" ^ (showExpr e1) ^ ", " ^ (showExpr e2) ^ ")"
       else
         let
           val (p, a) = priOfT (Keyword s)
@@ -372,14 +386,14 @@ struct
           val p2 = #1 (priOf e2)
         in
           if a = Priority.L then
-            (if p1 <  p then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " " ^ s ^ " " ^
+            (showType t) ^ (if p1 <  p then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " " ^ s ^ " " ^
             (if p2 <= p then "(" ^ (showExpr e2) ^ ")" else showExpr e2)
           else
-            (if p1 <= p then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " " ^ s ^ " " ^
+            (showType t) ^ (if p1 <= p then "(" ^ (showExpr e1) ^ ")" else showExpr e1) ^ " " ^ s ^ " " ^
             (if p2 <  p then "(" ^ (showExpr e2) ^ ")" else showExpr e2)
         end
 
-    | showExpr (BE_Commutative (_, Keyword s, es)) =
+    | showExpr (BE_Commutative (t, Keyword s, es)) =
       let
         val p = #1 (priOfT (Keyword s)) (* 可換演算子はすべて左結合 *)
         val pl = List.map (fn e => (e, #1 (priOf e))) es
@@ -387,9 +401,9 @@ struct
           | concatExprList ((e, ep) :: xs) = " " ^ s ^ " " ^ (if ep <= p then "(" ^ (showExpr e) ^ ")" else showExpr e) ^ (concatExprList xs)
         val (fste, fstep) = hd pl
       in
-        (if fstep < p then "(" ^ (showExpr fste) ^ ")" else showExpr fste) ^ (concatExprList (tl pl))
+        (showType t) ^ (if fstep < p then "(" ^ (showExpr fste) ^ ")" else showExpr fste) ^ (concatExprList (tl pl))
       end
-    | showExpr (BE_Fnc (_, e1, e2)) = (
+    | showExpr (BE_Fnc (t, e1, e2)) = (showType t) ^ (
         if #1 (priOf e1) < 230 then
           "(" ^ (showExpr e1) ^ ")"
         else
@@ -398,7 +412,7 @@ struct
           | BE_Img  _ => "(" ^ (showExpr e1) ^ ")"
           | _         => showExpr e1              ) ^
         "(" ^ (showExpr e2) ^ ")"
-    | showExpr (BE_Img (_, e1, e2)) = (
+    | showExpr (BE_Img (t, e1, e2)) = (showType t) ^ (
         if #1 (priOf e1) < 230 then
           "(" ^ (showExpr e1) ^ ")"
         else
@@ -407,14 +421,14 @@ struct
           | BE_Img _ => "(" ^ (showExpr e1) ^ ")"
           | _ => showExpr e1) ^ "[" ^ (showExpr e2) ^ "]"
 
-    | showExpr (BE_NodeN (_, Keyword s, es)) = s ^ "(" ^ (showExprList es) ^ ")"
+    | showExpr (BE_NodeN (t, Keyword s, es)) = (showType t) ^ s ^ "(" ^ (showExprList es) ^ ")"
     | showExpr (BE_Bool (BP e)) = "bool(" ^ (showExpr e) ^ ")"
 
-    | showExpr (BE_ExSet (_, l)) = "{" ^ (showExprList l) ^ "}"
+    | showExpr (BE_ExSet (t, l)) = (showType t) ^ "{" ^ (showExprList l) ^ "}"
 
-    | showExpr (BE_InSet (_, v, BP p)) = "{" ^ (showTokenList v) ^ " | " ^ (showExpr p) ^ "}"
+    | showExpr (BE_InSet (t, v, BP p)) = (showType t) ^ "{" ^ (showTokenList v) ^ " | " ^ (showExpr p) ^ "}"
 
-    | showExpr (BE_Seq (_, e)) = "[" ^ (showExprList e) ^ "]"
+    | showExpr (BE_Seq (t, e)) = (showType t) ^ "[" ^ (showExprList e) ^ "]"
 
     | showExpr (BE_ForAll ([], _, _)) = raise ShowError "missing variables of \"!\""
     | showExpr (BE_ForAll ([x], BP p1, BP p2)) = "!" ^  (showToken x) ^       ".(" ^ (showExpr p1) ^ " => " ^ (showExpr p2) ^ ")"
@@ -424,13 +438,13 @@ struct
     | showExpr (BE_Exists ([x], BP p)) = "#" ^  (showToken x) ^       ".(" ^ (showExpr p) ^ ")"
     | showExpr (BE_Exists (xs,  BP p)) = "#(" ^ (showTokenList xs) ^ ").(" ^ (showExpr p) ^ ")"
 
-    | showExpr (BE_Lambda (_, xs, BP p, e)) = showLambdas "%"     xs p e
-    | showExpr (BE_Sigma  (_, xs, BP p, e)) = showSigma  "SIGMA" xs p e
-    | showExpr (BE_Pi     (_, xs, BP p, e)) = showSigma  "PI"    xs p e
-    | showExpr (BE_Inter  (_, xs, BP p, e)) = showLambdas "INTER" xs p e
-    | showExpr (BE_Union  (_, xs, BP p, e)) = showLambdas "UNION" xs p e
+    | showExpr (BE_Lambda (t, xs, BP p, e)) = (showType t) ^ showLambdas "%"     xs p e
+    | showExpr (BE_Sigma  (t, xs, BP p, e)) = (showType t) ^ showSigma  "SIGMA" xs p e
+    | showExpr (BE_Pi     (t, xs, BP p, e)) = (showType t) ^ showSigma  "PI"    xs p e
+    | showExpr (BE_Inter  (t, xs, BP p, e)) = (showType t) ^ showLambdas "INTER" xs p e
+    | showExpr (BE_Union  (t, xs, BP p, e)) = (showType t) ^ showLambdas "UNION" xs p e
 
-    | showExpr (BE_Struct (_, l)) =
+    | showExpr (BE_Struct (t, l)) =
       let
         fun fields [] = raise ShowError "empty struct"
           | fields [(s, e)] =
@@ -448,10 +462,10 @@ struct
             else
               s ^ ":"  ^ (showExpr e) ^  ", " ^ (fields rest)
       in
-        "struct(" ^ (fields l) ^ ")"
+        (showType t) ^ "struct(" ^ (fields l) ^ ")"
       end
 
-    | showExpr (BE_Rec (_, l)) =
+    | showExpr (BE_Rec (t, l)) =
       let
         fun unwrapLabel NONE = ""
           | unwrapLabel (SOME s) = s ^ ":"
@@ -471,9 +485,9 @@ struct
             else
               (unwrapLabel sOpt) ^       (showExpr e) ^  ", " ^ (fields rest)
       in
-        "rec(" ^ (fields l) ^ ")"
+        (showType t) ^ "rec(" ^ (fields l) ^ ")"
       end
-    | showExpr (BE_RcAc (_, e, s)) = (showExpr e) ^ s
+    | showExpr (BE_RcAc (t, e, s)) = (showType t) ^ (showExpr e) ^ s
     | showExpr _ = raise ShowError "unknown expression"
 
   and
@@ -498,14 +512,23 @@ struct
       showTokenList l = Utils.concatWith ", " (List.map showToken l)
 
   and
-      showToken (Var l)            = "[Var]" ^ l
+      (* showToken (Var l)            = "[Var]" ^ l
     | showToken (Renamed (rn, v))  = "[Renamed]" ^ rn ^ "." ^ v
     | showToken (IntegerLiteral n) = "[IntegerLiteral]" ^ IntInf.toString n
     | showToken (StringLiteral s)  = "[StringLiteral]" ^ "\"" ^ s ^ "\""
     | showToken (RealLiteral r)    = "[RealLiteral]" ^ BReal.toString r
     | showToken (Keyword s)        = "[Keyword]" ^ s
     | showToken (VarLit l)         = "[VarLit]" ^ l
-    | showToken (VarSingle l)      = "[VarSingle]" ^ l
+    | showToken (VarSingle l)      = "[VarSingle]" ^ l *)
+      showToken (Var l)            =  l
+    | showToken (Renamed (rn, v))  =  rn ^ "." ^ v
+    | showToken (IntegerLiteral n) =  IntInf.toString n
+    | showToken (StringLiteral s)  =  "\"" ^ s ^ "\""
+    | showToken (RealLiteral r)    =  BReal.toString r
+    | showToken (Keyword s)        =  s
+    | showToken (VarLit l)         =  l
+    | showToken (VarSingle l)      =  l
+    | showToken (VarTypeSet s)     =  s
 
   and
       showHistory [] = "/*\n*/\n"
@@ -520,6 +543,7 @@ struct
   and
       showModelDependencies [] = "/*\n*/\n"
     | showModelDependencies l  = "/*\n" ^ (String.concat (List.map (fn s => s ^ "\n") l)) ^ "*/\n"
+
 end
 
 
